@@ -7,6 +7,7 @@
 
 #include <tuple>
 #include <assert.h>
+#include <stdexcept>
 
 //////// Constructor ////////
 
@@ -35,25 +36,68 @@ void NaiveTable<TupleGroupType>::removeColumnsFromEnd(int numColumns) {
 template<typename TupleGroupType>
 void NaiveTable<TupleGroupType>::addTuple(std::tuple<int> data) {
 
-    // Preconditions
-    assert(tuple_groups.size() < NUMBER_TUPLE_GROUPS);
+    // Check if the last tuple group has space for this tuple
+    TupleGroupType &last_tuple_group = this->tuple_groups.back();
+    if (!last_tuple_group.isFull()) {
 
-    // TODO
+        // Has space, directly push to it
+        last_tuple_group.addTuple(data);
+        return;
+
+    }
+
+    // Otherwise, need to make a new tuple group
+    // Preconditions
+    assert(!this->isFull());
+    TupleGroupType new_tuple_group = TupleGroupType();
+
+    // Push tuple to this new tuple group
+    new_tuple_group.addTuple(data);
+
+    // Add tuple group to our vector
+    this->tuple_groups.push_back(new_tuple_group);
 }
 
 template<typename TupleGroupType>
 void NaiveTable<TupleGroupType>::startScan() {
-    // TODO probs need some extra member variables for this
+
+    // Reset scan index to point to first tuple group
+    this->scan_index = 0;
+
 }
 
 template<typename TupleGroupType>
 std::tuple<int> &NaiveTable<TupleGroupType>::getNextTuple() {
-    // TODO
-    std::tuple<int> t = {};
-    return t;   // FIXME dummy code
+
+    while (true) {
+
+        // Check if there are no more tuple groups to scan
+        if (this->scan_index >= this->tuple_groups.size()) {
+            throw std::length_error("No more tuple groups to scan in table");
+        }
+
+        try {
+
+            // Try to scan the current tuple group
+            TupleGroupType &curr_tuple_group = this->tuple_groups[this->scan_index];
+            return curr_tuple_group.getNextTuple();
+
+        } catch (const std::length_error &e) {
+
+            // Tuple group has been fully scanned, move onto next tuple group
+            this->scan_index++;
+
+        }
+    }
 }
 
 //////// Other ////////
+
+template<typename TupleGroupType>
+bool NaiveTable<TupleGroupType>::isFull() const {
+    return this->tuple_groups.size() >= NUMBER_TUPLE_GROUPS;
+}
+
 
 // Example usage (don't delete, needed for linking!)
 template

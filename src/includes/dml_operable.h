@@ -38,6 +38,7 @@ public:
      * Similar to tuple-at-a-time / volcano style iterator model.
      *
      * @return next tuple (by reference)
+     * @throws length_error if no more tuples to get
      */
     virtual std::tuple<int> &getNextTuple() = 0;
 

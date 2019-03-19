@@ -41,8 +41,12 @@ public:
 
     std::tuple<int> &getNextTuple() override;
 
+    bool isFull() const;
+
 protected:
 
     std::vector<TupleGroupType> tuple_groups;
+
+    int scan_index = 0;
 
 };

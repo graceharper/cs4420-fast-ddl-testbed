@@ -31,17 +31,33 @@ void NaiveTupleGroup::removeColumnsFromEnd(int numColumns) {
 void NaiveTupleGroup::addTuple(std::tuple<int> data) {
 
     // Preconditions
-    assert(tuples.size() < NUMBER_TUPLES_PER_GROUP);
+    assert(!this->isFull());
 
-    // TODO
+    // Add tuple directly to underlying vector (by copy)
+    this->tuples.push_back(data);
 }
 
 void NaiveTupleGroup::startScan() {
-    // TODO probs need some extra member variables for this
+
+    // Reset scan index to point to first tuple group
+    this->scan_index = 0;
+
 }
 
 std::tuple<int> &NaiveTupleGroup::getNextTuple() {
-    // TODO
-    std::tuple<int> t = {};
-    return t;   // FIXME dummy code
+
+    // Check if there are no more tuples to scan
+    if (this->scan_index >= this->tuples.size()) {
+        throw std::length_error("No more tuples to scan in tuple group");
+    }
+
+    // Return and increment
+    return this->tuples[scan_index++];
+
+}
+
+//////// Other helpers ////////
+
+bool NaiveTupleGroup::isFull() const {
+    return this->tuples.size() >= NUMBER_TUPLES_PER_GROUP;
 }

@@ -37,9 +37,13 @@ public:
 
     std::tuple<int> &getNextTuple() override;
 
+    bool isFull() const;
+
 protected:
 
     std::vector<std::tuple<int>> tuples;
+
+    int scan_index = 0;
 
 };
 
