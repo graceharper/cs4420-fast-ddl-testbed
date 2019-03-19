@@ -4,12 +4,13 @@
 
 #pragma once
 
+#include <tuple>
+
 /**
  * Represents a class that supports DML Operations.
  *
  * Any class of this type must implement all the "DML" functions below.
  */
-template<typename TupleType>
 class DmlOperable {
 
     /**
@@ -27,8 +28,8 @@ class DmlOperable {
      * Returns the next tuple in the scan for the given data structure.
      * Similar to tuple-at-a-time / volcano style iterator model.
      *
-     * @return tuple of the templated type (by reference)
+     * @return next tuple (by reference)
      */
-    virtual TupleType &getNextTuple() = 0;
+    virtual std::tuple<int> &getNextTuple() = 0;
 
 };
