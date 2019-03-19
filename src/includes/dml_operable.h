@@ -13,11 +13,20 @@
  */
 class DmlOperable {
 
+public:
+
     /**
      * Virtual destructor required
      * https://stackoverflow.com/questions/461203/when-to-use-virtual-destructors
      */
     virtual ~DmlOperable() = default;
+
+    /**
+     * Add a tuple of data to the given data structure.
+     *
+     * @param data the tuple to store
+     */
+    virtual void addTuple(std::tuple<int> data) = 0;
 
     /**
      * Start (or re-start) the scan on the given data structure

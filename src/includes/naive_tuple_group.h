@@ -5,7 +5,12 @@
 #include "ddl_operable.h"
 #include "dml_operable.h"
 
+#include <vector>
+#include <tuple>
+
 #pragma once
+
+constexpr size_t NUMBER_TUPLES_PER_GROUP = 16;
 
 /**
  * A naive tuple group implementation. On addition and deletion of a column:
@@ -18,15 +23,23 @@ class NaiveTupleGroup :
 
 public:
 
-    ~NaiveTupleGroup() = default;
+    NaiveTupleGroup();
+
+    ~NaiveTupleGroup() override = default;
 
     void addColumnsToEnd(int numColumns) override;
 
     void removeColumnsFromEnd(int numColumns) override;
 
+    void addTuple(std::tuple<int> data) override;
+
     void startScan() override;
 
     std::tuple<int> &getNextTuple() override;
+
+protected:
+
+    std::vector<std::tuple<int>> tuples;
 
 };
 

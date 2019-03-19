@@ -9,6 +9,10 @@
 #include "ddl_operable.h"
 #include "dml_operable.h"
 
+#include <vector>
+
+constexpr size_t NUMBER_TUPLE_GROUPS = 8;
+
 /**
  * A naive table implementation. On addition and deletion of a column:
  * - Locks the entire table
@@ -23,15 +27,22 @@ class NaiveTable :
 
 public:
 
-    ~NaiveTable() = default;
+    NaiveTable();
+
+    ~NaiveTable() override = default;
 
     void addColumnsToEnd(int numColumns) override;
 
     void removeColumnsFromEnd(int numColumns) override;
 
+    void addTuple(std::tuple<int> data) override;
+
     void startScan() override;
 
     std::tuple<int> &getNextTuple() override;
+
+protected:
+
+    std::vector<TupleGroupType> tuple_groups;
+
 };
-
-
