@@ -4,11 +4,14 @@
 
 #pragma once
 
+#include "naive_table.h"
+
 /**
  * Represents a class that supports DDL Operations.
  *
  * Any class of this type must implement all the "DDL" functions below.
  */
+template<typename PrevType>
 class DdlOperable {
 
 public:
@@ -22,6 +25,6 @@ public:
     /**
      * Runs the DDL operation to move tuples from one data structure to another.
      */
-    virtual void runDdlOperation() = 0;
+    virtual void copyDataFrom(PrevType prevStorage) = 0;
 
 };

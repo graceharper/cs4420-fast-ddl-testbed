@@ -7,22 +7,16 @@
 
 #include <array>
 
-template<int PreNumAttr, int PostNumAttr>
+template<int NumAttr>
 class DbTuple {
 
 public:
 
     // TODO add any metadata here as well
 
-    explicit DbTuple(std::array<int, PreNumAttr> dataBeforeDdl);
+    explicit DbTuple(std::array<int, NumAttr> data);
 
-    explicit DbTuple(std::array<int, PostNumAttr> dataAfterDdl);
-
-    bool ddlOperationComplete = false;
-
-    std::array<int, PreNumAttr> dataBeforeDdl;
-
-    std::array<int, PostNumAttr> dataAfterDdl;
+    std::array<int, NumAttr> data;
 
 };
 

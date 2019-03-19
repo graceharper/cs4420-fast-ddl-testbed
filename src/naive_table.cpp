@@ -2,8 +2,8 @@
 // Created by tejun on 3/18/2019.
 //
 
-#include "includes/naive_table.h"
-#include "includes/naive_tuple_group.h"
+#include "naive_table.h"
+#include "naive_tuple_group.h"
 
 #include <tuple>
 #include <assert.h>
@@ -11,8 +11,8 @@
 
 //////// Constructor ////////
 
-template<typename TupleGroupType>
-NaiveTable<TupleGroupType>::NaiveTable() {
+template<int NumAttr>
+NaiveTable<NumAttr>::NaiveTable() {
 
     // Reserve space for all the tuple groups to keep it contiguous
     this->tuple_groups.reserve(NUMBER_TUPLE_GROUPS);
@@ -21,23 +21,15 @@ NaiveTable<TupleGroupType>::NaiveTable() {
 
 //////// DDL Operations ////////
 
-template<typename TupleGroupType>
-void NaiveTable<TupleGroupType>::addColumnsToEnd(int numColumns) {
-    // TODO
-}
-
-template<typename TupleGroupType>
-void NaiveTable<TupleGroupType>::removeColumnsFromEnd(int numColumns) {
-    // TODO
-}
+// TODO
 
 //////// DML Operations ////////
 
-template<typename TupleGroupType>
-void NaiveTable<TupleGroupType>::addTuple(std::tuple<int> data) {
+template<int NumAttr>
+void NaiveTable<NumAttr>::addTuple(std::array<int, NumAttr> data) {
 
     // Check if the last tuple group has space for this tuple
-    TupleGroupType &last_tuple_group = this->tuple_groups.back();
+    NaiveTupleGroup<NumAttr> &last_tuple_group = this->tuple_groups.back();
     if (!last_tuple_group.isFull()) {
 
         // Has space, directly push to it
@@ -49,7 +41,7 @@ void NaiveTable<TupleGroupType>::addTuple(std::tuple<int> data) {
     // Otherwise, need to make a new tuple group
     // Preconditions
     assert(!this->isFull());
-    TupleGroupType new_tuple_group = TupleGroupType();
+    NaiveTupleGroup<NumAttr> new_tuple_group{};
 
     // Push tuple to this new tuple group
     new_tuple_group.addTuple(data);
@@ -58,16 +50,16 @@ void NaiveTable<TupleGroupType>::addTuple(std::tuple<int> data) {
     this->tuple_groups.push_back(new_tuple_group);
 }
 
-template<typename TupleGroupType>
-void NaiveTable<TupleGroupType>::startScan() {
+template<int NumAttr>
+void NaiveTable<NumAttr>::startScan() {
 
     // Reset scan index to point to first tuple group
     this->scan_index = 0;
 
 }
 
-template<typename TupleGroupType>
-std::tuple<int> &NaiveTable<TupleGroupType>::getNextTuple() {
+template<int NumAttr>
+DbTuple<NumAttr> &NaiveTable<NumAttr>::getNextTuple() {
 
     while (true) {
 
@@ -79,7 +71,7 @@ std::tuple<int> &NaiveTable<TupleGroupType>::getNextTuple() {
         try {
 
             // Try to scan the current tuple group
-            TupleGroupType &curr_tuple_group = this->tuple_groups[this->scan_index];
+            NaiveTupleGroup<NumAttr> &curr_tuple_group = this->tuple_groups[this->scan_index];
             return curr_tuple_group.getNextTuple();
 
         } catch (const std::length_error &e) {
@@ -93,12 +85,12 @@ std::tuple<int> &NaiveTable<TupleGroupType>::getNextTuple() {
 
 //////// Other ////////
 
-template<typename TupleGroupType>
-bool NaiveTable<TupleGroupType>::isFull() const {
+template<int NumAttr>
+bool NaiveTable<NumAttr>::isFull() const {
     return this->tuple_groups.size() >= NUMBER_TUPLE_GROUPS;
 }
 
 
 // Example usage (don't delete, needed for linking!)
 template
-class NaiveTable<NaiveTupleGroup>;
+class NaiveTable<10>;

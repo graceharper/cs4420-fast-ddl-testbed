@@ -6,6 +6,7 @@
 
 #include "db_tuple.h"
 
+#include <vector>
 #include <array>
 
 /**
@@ -13,7 +14,7 @@
  *
  * Any class of this type must implement all the "DML" functions below.
  */
-template<int NumAttributes>
+template<int NumAttr>
 class DmlOperable {
 
 public:
@@ -26,10 +27,11 @@ public:
 
     /**
      * Add a tuple of data to the given data structure.
+     * Note tuples can only be added before running the DDL operation.
      *
-     * @param data the tuple to store
+     * @param data a list of column values
      */
-    virtual void addTuple(std::array<int, NumAttributes>) = 0;
+    virtual void addTuple(std::array<int, NumAttr> data) = 0;
 
     /**
      * Start (or re-start) the scan on the given data structure
@@ -40,9 +42,9 @@ public:
      * Returns the next tuple in the scan for the given data structure.
      * Similar to tuple-at-a-time / volcano style iterator model.
      *
-     * @return next tuple (by reference)
+     * @return next tuple (a reference, allowing you to change values in it)
      * @throws length_error if no more tuples to get
      */
-    virtual DbTuple<NumAttributes> &getNextTuple() = 0;
+    virtual DbTuple<NumAttr> &getNextTuple() = 0;
 
 };

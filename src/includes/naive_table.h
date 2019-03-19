@@ -9,20 +9,18 @@
 #include "ddl_operable.h"
 #include "dml_operable.h"
 #include "constants.h"
-
-#include <vector>
+#include "naive_tuple_group.h"
 
 /**
- * A naive table implementation. On addition and deletion of a column:
+ * A naive table implementation. On DDL operation (copy constructor):
  * - Locks the entire table
  * - Copies each tuple group into new tuple groups
  * - Does an atomic swap (across all tuple groups) after copying is done
  * - Unlocks the entire table
  */
-template<typename TupleGroupType>
+template<int NumAttr>
 class NaiveTable :
-        public virtual DdlOperable,
-        public virtual DmlOperable {
+        public virtual DmlOperable<NumAttr> {
 
 public:
 
@@ -30,21 +28,17 @@ public:
 
     ~NaiveTable() override = default;
 
-    void addColumnsToEnd(int numColumns) override;
-
-    void removeColumnsFromEnd(int numColumns) override;
-
-    void addTuple(std::tuple<int> data) override;
+    void addTuple(std::array<int, NumAttr> data) override;
 
     void startScan() override;
 
-    std::tuple<int> &getNextTuple() override;
+    DbTuple<NumAttr> &getNextTuple() override;
 
     bool isFull() const;
 
 protected:
 
-    std::vector<TupleGroupType> tuple_groups;
+    std::vector<NaiveTupleGroup<NumAttr>> tuple_groups;
 
     int scan_index = 0;
 

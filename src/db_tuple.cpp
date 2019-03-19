@@ -6,17 +6,13 @@
 
 //////// Constructor ////////
 
-template<int PreNumAttr, int PostNumAttr>
-DbTuple<PreNumAttr, PostNumAttr>::DbTuple(std::array<int, PreNumAttr> dataBeforeDdl) {
-    this->dataBeforeDdl = dataBeforeDdl;
-}
+template<int NumAttr>
+DbTuple<NumAttr>::DbTuple(std::array<int, NumAttr> data) {
 
-template<int PreNumAttr, int PostNumAttr>
-DbTuple<PreNumAttr, PostNumAttr>::DbTuple(std::array<int, PostNumAttr> dataAfterDdl) {
-    this->dataAfterDdl = dataAfterDdl;
-    this->ddlOperationComplete = true;
+    this->data = data;
+
 }
 
 // Example usage (don't delete, needed for linking!)
 template
-class DbTuple<10, 20>;
+class DbTuple<10>;

@@ -12,17 +12,13 @@
 #pragma once
 
 /**
- * A naive tuple group implementation. On addition and deletion of a column:
+ * A naive tuple group implementation. On DDL operation (copy constructor):
  * - Copies each tuple into new tuples
  * - Does an atomic swap (across all tuples) after copying is done
- *
- * Templated with the number of columns before and after the DDL operation.
- * Call runDdlOperation to actually change the number of columns.
  */
-template<int PreNumAttr, int PostNumAttr>
+template<int NumAttr>
 class NaiveTupleGroup :
-        public virtual DdlOperable,
-        public virtual DmlOperable<PreNumAttr> {
+        public virtual DmlOperable<NumAttr> {
 
 public:
 
@@ -30,19 +26,17 @@ public:
 
     ~NaiveTupleGroup() override = default;
 
-    void runDdlOperation() override;
-
-    void addTuple(std::array<int, PreNumAttr> data) override;
+    void addTuple(std::array<int, NumAttr> data) override;
 
     void startScan() override;
 
-    DbTuple<PreNumAttr> &getNextTuple() override;
+    DbTuple<NumAttr> &getNextTuple() override;
 
     bool isFull() const;
 
 protected:
 
-    std::array<DbTuple<PreNumAttr>, NUMBER_TUPLES_PER_GROUP> tuples;
+    std::array<DbTuple<NumAttr>, NUMBER_TUPLES_PER_GROUP> tuples;
 
     int num_tuples_filled = 0;
 
