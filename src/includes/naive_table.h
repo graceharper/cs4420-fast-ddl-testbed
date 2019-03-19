@@ -8,10 +8,9 @@
 
 #include "ddl_operable.h"
 #include "dml_operable.h"
+#include "constants.h"
 
 #include <vector>
-
-constexpr size_t NUMBER_TUPLE_GROUPS = 8;
 
 /**
  * A naive table implementation. On addition and deletion of a column:

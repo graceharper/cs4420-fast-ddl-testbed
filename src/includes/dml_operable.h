@@ -4,13 +4,16 @@
 
 #pragma once
 
-#include <tuple>
+#include "db_tuple.h"
+
+#include <array>
 
 /**
  * Represents a class that supports DML Operations.
  *
  * Any class of this type must implement all the "DML" functions below.
  */
+template<int NumAttributes>
 class DmlOperable {
 
 public:
@@ -26,7 +29,7 @@ public:
      *
      * @param data the tuple to store
      */
-    virtual void addTuple(std::tuple<int> data) = 0;
+    virtual void addTuple(std::array<int, NumAttributes>) = 0;
 
     /**
      * Start (or re-start) the scan on the given data structure
@@ -40,6 +43,6 @@ public:
      * @return next tuple (by reference)
      * @throws length_error if no more tuples to get
      */
-    virtual std::tuple<int> &getNextTuple() = 0;
+    virtual DbTuple<NumAttributes> &getNextTuple() = 0;
 
 };

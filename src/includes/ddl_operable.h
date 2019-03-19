@@ -20,18 +20,8 @@ public:
     virtual ~DdlOperable() = default;
 
     /**
-     * Adds the specified number of "integer" columns to the end of the data structure.
-     *
-     * @param numColumns the number of columns to add
+     * Runs the DDL operation to move tuples from one data structure to another.
      */
-    virtual void addColumnsToEnd(int numColumns) = 0;
-
-    /**
-     * Removes the specified number of "integer" columns from the end of the data structure.
-     *
-     * @param numColumns the number of columns to remove
-     * @throws length_error if the data structure would end up with less than 0 columns
-     */
-    virtual void removeColumnsFromEnd(int numColumns) = 0;
+    virtual void runDdlOperation() = 0;
 
 };

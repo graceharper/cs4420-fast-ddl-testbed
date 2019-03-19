@@ -9,45 +9,44 @@
 
 //////// Constructor ////////
 
-NaiveTupleGroup::NaiveTupleGroup() {
-
-    // Reserve space for all the tuples in group to keep it contiguous
-    this->tuples.reserve(NUMBER_TUPLES_PER_GROUP);
-
-}
+template<int PreNumAttr, int PostNumAttr>
+NaiveTupleGroup<PreNumAttr, PostNumAttr>::NaiveTupleGroup() = default;
 
 //////// DDL Operations ////////
 
-void NaiveTupleGroup::addColumnsToEnd(int numColumns) {
-    // TODO
-}
-
-void NaiveTupleGroup::removeColumnsFromEnd(int numColumns) {
+template<int PreNumAttr, int PostNumAttr>
+void NaiveTupleGroup<PreNumAttr, PostNumAttr>::runDdlOperation() {
     // TODO
 }
 
 //////// DML Operations ////////
 
-void NaiveTupleGroup::addTuple(std::tuple<int> data) {
+template<int PreNumAttr, int PostNumAttr>
+void NaiveTupleGroup<PreNumAttr, PostNumAttr>::addTuple(std::array<int, PreNumAttr> data) {
 
     // Preconditions
     assert(!this->isFull());
 
+    // Create tuple
+    DbTuple<PreNumAttr> tuple(data);
+
     // Add tuple directly to underlying vector (by copy)
-    this->tuples.push_back(data);
+    this->tuples[num_tuples_filled++] = tuple;
 }
 
-void NaiveTupleGroup::startScan() {
+template<int PreNumAttr, int PostNumAttr>
+void NaiveTupleGroup<PreNumAttr, PostNumAttr>::startScan() {
 
     // Reset scan index to point to first tuple group
     this->scan_index = 0;
 
 }
 
-std::tuple<int> &NaiveTupleGroup::getNextTuple() {
+template<int PreNumAttr, int PostNumAttr>
+DbTuple<PreNumAttr> &NaiveTupleGroup<PreNumAttr, PostNumAttr>::getNextTuple() {
 
     // Check if there are no more tuples to scan
-    if (this->scan_index >= this->tuples.size()) {
+    if (this->scan_index >= this->num_tuples_filled) {
         throw std::length_error("No more tuples to scan in tuple group");
     }
 
@@ -58,6 +57,11 @@ std::tuple<int> &NaiveTupleGroup::getNextTuple() {
 
 //////// Other helpers ////////
 
-bool NaiveTupleGroup::isFull() const {
-    return this->tuples.size() >= NUMBER_TUPLES_PER_GROUP;
+template<int PreNumAttr, int PostNumAttr>
+bool NaiveTupleGroup<PreNumAttr, PostNumAttr>::isFull() const {
+    return this->num_tuples_filled >= NUMBER_TUPLES_PER_GROUP;
 }
+
+// Example usage (don't delete, needed for linking!)
+template
+class NaiveTupleGroup<10, 20>;
