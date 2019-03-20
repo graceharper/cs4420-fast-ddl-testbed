@@ -4,15 +4,21 @@
 
 #include "db_tuple.h"
 
-//////// Constructor ////////
+//////// Other ////////
 
 template<int NumAttr>
-DbTuple<NumAttr>::DbTuple(std::array<int, NumAttr> data) {
-
-    this->data = data;
-
+std::array<int, NumAttr> &DbTuple<NumAttr>::getData() {
+    return this->data;
 }
 
-// Example usage (don't delete, needed for linking!)
+template<int NumAttr>
+void DbTuple<NumAttr>::setData(std::array<int, NumAttr> data) {
+    this->data = data;
+}
+
+// Example usages needed for linking!
 template
-class DbTuple<10>;
+class DbTuple<4>;
+
+template
+class DbTuple<7>;

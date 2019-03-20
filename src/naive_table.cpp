@@ -5,31 +5,24 @@
 #include "naive_table.h"
 #include "naive_tuple_group.h"
 
-#include <tuple>
 #include <assert.h>
 #include <stdexcept>
 
-//////// Constructor ////////
-
-template<int NumAttr>
-NaiveTable<NumAttr>::NaiveTable() {
-
-    // Reserve space for all the tuple groups to keep it contiguous
-    this->tuple_groups.reserve(NUMBER_TUPLE_GROUPS);
-
-}
-
 //////// DDL Operations ////////
 
-// TODO
-
+template<int NumAttr>
+template<int PrevNumAttr>
+NaiveTable<NumAttr>::NaiveTable(NaiveTable<PrevNumAttr> &toCopy) {
+    // TODO @sai, copy all tuple groups into this instance
+    // Make sure to use the copy constructor of the NaiveTupleGroups
+}
 //////// DML Operations ////////
 
 template<int NumAttr>
 void NaiveTable<NumAttr>::addTuple(std::array<int, NumAttr> data) {
 
     // Check if the last tuple group has space for this tuple
-    NaiveTupleGroup<NumAttr> &last_tuple_group = this->tuple_groups.back();
+    NaiveTupleGroup<NumAttr> &last_tuple_group = this->tuple_groups[num_tuple_groups_filled];
     if (!last_tuple_group.isFull()) {
 
         // Has space, directly push to it
@@ -46,8 +39,8 @@ void NaiveTable<NumAttr>::addTuple(std::array<int, NumAttr> data) {
     // Push tuple to this new tuple group
     new_tuple_group.addTuple(data);
 
-    // Add tuple group to our vector
-    this->tuple_groups.push_back(new_tuple_group);
+    // Add tuple group to our vector and increment
+    this->tuple_groups[num_tuple_groups_filled++] = new_tuple_group;
 }
 
 template<int NumAttr>
@@ -64,7 +57,7 @@ DbTuple<NumAttr> &NaiveTable<NumAttr>::getNextTuple() {
     while (true) {
 
         // Check if there are no more tuple groups to scan
-        if (this->scan_index >= this->tuple_groups.size()) {
+        if (this->scan_index >= this->num_tuple_groups_filled) {
             throw std::length_error("No more tuple groups to scan in table");
         }
 
@@ -87,10 +80,12 @@ DbTuple<NumAttr> &NaiveTable<NumAttr>::getNextTuple() {
 
 template<int NumAttr>
 bool NaiveTable<NumAttr>::isFull() const {
-    return this->tuple_groups.size() >= NUMBER_TUPLE_GROUPS;
+    return this->num_tuple_groups_filled >= NUMBER_TUPLE_GROUPS;
 }
 
-
-// Example usage (don't delete, needed for linking!)
+// Example usages needed for linking!
 template
-class NaiveTable<10>;
+class NaiveTable<4>;
+
+template
+class NaiveTable<7>;

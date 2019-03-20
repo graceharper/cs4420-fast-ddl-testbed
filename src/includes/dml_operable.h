@@ -6,7 +6,6 @@
 
 #include "db_tuple.h"
 
-#include <vector>
 #include <array>
 
 /**

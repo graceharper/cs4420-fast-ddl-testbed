@@ -2,7 +2,6 @@
 // Created by tejun on 3/18/2019.
 //
 
-#include "ddl_operable.h"
 #include "dml_operable.h"
 #include "db_tuple.h"
 #include "constants.h"
@@ -22,9 +21,12 @@ class NaiveTupleGroup :
 
 public:
 
-    NaiveTupleGroup();
+    NaiveTupleGroup() = default;
 
     ~NaiveTupleGroup() override = default;
+
+    template<int PrevNumAttr>
+    NaiveTupleGroup(NaiveTupleGroup<PrevNumAttr> &toCopy);
 
     void addTuple(std::array<int, NumAttr> data) override;
 
@@ -36,6 +38,7 @@ public:
 
 protected:
 
+    // Default-initialization of array
     std::array<DbTuple<NumAttr>, NUMBER_TUPLES_PER_GROUP> tuples;
 
     int num_tuples_filled = 0;

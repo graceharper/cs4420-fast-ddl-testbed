@@ -6,10 +6,11 @@
 #pragma once
 
 
-#include "ddl_operable.h"
 #include "dml_operable.h"
 #include "constants.h"
 #include "naive_tuple_group.h"
+
+#include <array>
 
 /**
  * A naive table implementation. On DDL operation (copy constructor):
@@ -24,9 +25,12 @@ class NaiveTable :
 
 public:
 
-    NaiveTable();
+    NaiveTable() = default;
 
     ~NaiveTable() override = default;
+
+    template<int PrevNumAttr>
+    NaiveTable(NaiveTable<PrevNumAttr> &toCopy);
 
     void addTuple(std::array<int, NumAttr> data) override;
 
@@ -38,8 +42,11 @@ public:
 
 protected:
 
-    std::vector<NaiveTupleGroup<NumAttr>> tuple_groups;
+    // Default-initialization of array
+    std::array<NaiveTupleGroup<NumAttr>, NUMBER_TUPLE_GROUPS> tuple_groups;
 
-    int scan_index = 0;
+    int num_tuple_groups_filled;
+
+    int scan_index;
 
 };

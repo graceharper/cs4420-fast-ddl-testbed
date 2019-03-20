@@ -6,14 +6,13 @@
 
 #include <assert.h>
 
-//////// Constructor ////////
-
-template<int NumAttr>
-NaiveTupleGroup<NumAttr>::NaiveTupleGroup() = default;
-
 //////// DDL Operations ////////
 
-// TODO
+template<int NumAttr>
+template<int PrevNumAttr>
+NaiveTupleGroup<NumAttr>::NaiveTupleGroup(NaiveTupleGroup<PrevNumAttr> &toCopy) {
+    // TODO @sai, copy all tuples into this instance
+}
 
 //////// DML Operations ////////
 
@@ -24,7 +23,8 @@ void NaiveTupleGroup<NumAttr>::addTuple(std::array<int, NumAttr> data) {
     assert(!this->isFull());
 
     // Create tuple
-    DbTuple<NumAttr> tuple(data);
+    DbTuple<NumAttr> tuple{};
+    tuple.setData(data);
 
     // Add tuple directly to underlying vector (by copy)
     this->tuples[num_tuples_filled++] = tuple;
@@ -58,6 +58,9 @@ bool NaiveTupleGroup<NumAttr>::isFull() const {
     return this->num_tuples_filled >= NUMBER_TUPLES_PER_GROUP;
 }
 
-// Example usage (don't delete, needed for linking!)
+// Example usages needed for linking!
 template
-class NaiveTupleGroup<10>;
+class NaiveTupleGroup<4>;
+
+template
+class NaiveTupleGroup<7>;
