@@ -23,7 +23,7 @@ template<int NumAttr>
 void NaiveTable<NumAttr>::addTuple(std::array<int, NumAttr> data) {
 
     // Check if the last tuple group has space for this tuple
-    NaiveTupleGroup<NumAttr> &last_tuple_group = this->tuple_groups[num_tuple_groups_filled];
+    NaiveTupleGroup<NumAttr> &last_tuple_group = this->tuple_groups[this->num_tuple_groups_filled];
     if (!last_tuple_group.isFull()) {
 
         // Has space, directly push to it
@@ -32,16 +32,18 @@ void NaiveTable<NumAttr>::addTuple(std::array<int, NumAttr> data) {
 
     }
 
-    // Otherwise, need to make a new tuple group
+    // Otherwise, need to move onto the next tuple group
     // Preconditions
     assert(!this->isFull());
-    NaiveTupleGroup<NumAttr> new_tuple_group{};
+
+    // Move pointer
+    this->num_tuple_groups_filled++;
+
+    // Get next tuple
+    NaiveTupleGroup<NumAttr> &next_tuple_group = this->tuple_groups[this->num_tuple_groups_filled];
 
     // Push tuple to this new tuple group
-    new_tuple_group.addTuple(data);
-
-    // Add tuple group to our vector and increment
-    this->tuple_groups[num_tuple_groups_filled++] = new_tuple_group;
+    next_tuple_group.addTuple(data);
 }
 
 template<int NumAttr>
@@ -49,6 +51,11 @@ void NaiveTable<NumAttr>::startScan() {
 
     // Reset scan index to point to first tuple group
     this->scan_index = 0;
+
+    // Reset scan index in all tuple groups
+    for (NaiveTupleGroup<NumAttr> group : this->tuple_groups) {
+        group.startScan();
+    }
 
 }
 
@@ -58,7 +65,7 @@ std::array<int, NumAttr> &NaiveTable<NumAttr>::getNextTuple() {
     while (true) {
 
         // Check if there are no more tuple groups to scan
-        if (this->scan_index >= this->num_tuple_groups_filled) {
+        if (this->scan_index > this->num_tuple_groups_filled) {
             throw std::length_error("No more tuple groups to scan in table");
         }
 

@@ -22,12 +22,14 @@ void NaiveTupleGroup<NumAttr>::addTuple(std::array<int, NumAttr> data) {
     // Preconditions
     assert(!this->isFull());
 
-    // Create tuple
-    DbTuple<NumAttr> tuple{};
+    // Get tuple
+    DbTuple<NumAttr> &tuple = this->tuples[this->num_tuples_filled];
+
+    // Store data
     tuple.setData(data);
 
-    // Add tuple directly to underlying vector (by copy)
-    this->tuples[num_tuples_filled++] = tuple;
+    // Increment index
+    this->num_tuples_filled++;
 }
 
 template<int NumAttr>
@@ -47,7 +49,7 @@ std::array<int, NumAttr> &NaiveTupleGroup<NumAttr>::getNextTuple() {
     }
 
     // Return and increment
-    DbTuple<NumAttr> tuple = this->tuples[scan_index++];
+    DbTuple<NumAttr> &tuple = this->tuples[scan_index++];
     return tuple.getData();
 
 }

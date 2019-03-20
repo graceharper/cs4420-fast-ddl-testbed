@@ -20,12 +20,18 @@ int main() {
     smallTable.addTuple({3, 3, 3, 3});
     std::cout << "Added tuples to small table" << std::endl;
 
-    // FIXME Verify tuples
-//    smallTable.startScan();
-//    for (int i = 0; i < 3; i++) {
-//        std::array<int, 4> tuple_out = smallTable.getNextTuple();
-//        std::cout << "Tuple " << i << " is " << tuple_out.data() << std::endl;
-//    }
+    // Verify tuples
+    smallTable.startScan();
+    for (int i = 0; i < 3; i++) {
+        std::array<int, 4> &tuple_out = smallTable.getNextTuple();
+        std::cout << "Tuple " << i << " is at memory address " << tuple_out.data() << std::endl;
+    }
+
+    try {
+        smallTable.getNextTuple();
+    } catch (const std::length_error &e) {
+        std::cout << "No more tuples, as expected" << std::endl;
+    }
 
     // Make a new table of 7 columns that copies everything from the smaller table
     // Since this is a "naive" table, its expected that EVERYTHING is copied right now
@@ -35,6 +41,14 @@ int main() {
     // Add another tuple (this time with 7 columns)
     bigTable.addTuple({4, 4, 4, 4, 4, 4, 4});
     std::cout << "Added tuples to big table" << std::endl;
+
+    // FIXME this won't work until DDL operation is implemented @sai
+    // Scan again
+    bigTable.startScan();
+    for (int i = 0; i < 4; i++) {
+        std::array<int, 7> &tuple_out = bigTable.getNextTuple();
+        std::cout << "Tuple " << i << " is at memory address " << tuple_out.data() << std::endl;
+    }
 
     return 0;
 }
