@@ -44,6 +44,6 @@ public:
      * @return next tuple (a reference, allowing you to change values in it)
      * @throws length_error if no more tuples to get
      */
-    virtual DbTuple<NumAttr> &getNextTuple() = 0;
+    virtual std::array<int, NumAttr> &getNextTuple() = 0;
 
 };

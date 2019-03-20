@@ -36,7 +36,7 @@ public:
 
     void startScan() override;
 
-    DbTuple<NumAttr> &getNextTuple() override;
+    std::array<int, NumAttr> &getNextTuple() override;
 
     bool isFull() const;
 
@@ -50,3 +50,6 @@ protected:
     int scan_index;
 
 };
+
+// Link to template implementation
+#include "naive_table.tpp"

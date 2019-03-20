@@ -12,10 +12,11 @@
 
 template<int NumAttr>
 template<int PrevNumAttr>
-NaiveTable<NumAttr>::NaiveTable(NaiveTable<PrevNumAttr> &toCopy) {
+NaiveTable<NumAttr>::NaiveTable(NaiveTable<PrevNumAttr> &toCopy) : num_tuple_groups_filled(0), scan_index(0) {
     // TODO @sai, copy all tuple groups into this instance
     // Make sure to use the copy constructor of the NaiveTupleGroups
 }
+
 //////// DML Operations ////////
 
 template<int NumAttr>
@@ -52,7 +53,7 @@ void NaiveTable<NumAttr>::startScan() {
 }
 
 template<int NumAttr>
-DbTuple<NumAttr> &NaiveTable<NumAttr>::getNextTuple() {
+std::array<int, NumAttr> &NaiveTable<NumAttr>::getNextTuple() {
 
     while (true) {
 
@@ -82,10 +83,3 @@ template<int NumAttr>
 bool NaiveTable<NumAttr>::isFull() const {
     return this->num_tuple_groups_filled >= NUMBER_TUPLE_GROUPS;
 }
-
-// Example usages needed for linking!
-template
-class NaiveTable<4>;
-
-template
-class NaiveTable<7>;

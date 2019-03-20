@@ -30,4 +30,7 @@ protected:
 
 };
 
+// Link to template implementation
+#include "db_tuple.tpp"
+
 

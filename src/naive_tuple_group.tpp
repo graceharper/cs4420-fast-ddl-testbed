@@ -10,7 +10,7 @@
 
 template<int NumAttr>
 template<int PrevNumAttr>
-NaiveTupleGroup<NumAttr>::NaiveTupleGroup(NaiveTupleGroup<PrevNumAttr> &toCopy) {
+NaiveTupleGroup<NumAttr>::NaiveTupleGroup(NaiveTupleGroup<PrevNumAttr> &toCopy) : num_tuples_filled(0), scan_index(0) {
     // TODO @sai, copy all tuples into this instance
 }
 
@@ -39,7 +39,7 @@ void NaiveTupleGroup<NumAttr>::startScan() {
 }
 
 template<int NumAttr>
-DbTuple<NumAttr> &NaiveTupleGroup<NumAttr>::getNextTuple() {
+std::array<int, NumAttr> &NaiveTupleGroup<NumAttr>::getNextTuple() {
 
     // Check if there are no more tuples to scan
     if (this->scan_index >= this->num_tuples_filled) {
@@ -47,7 +47,8 @@ DbTuple<NumAttr> &NaiveTupleGroup<NumAttr>::getNextTuple() {
     }
 
     // Return and increment
-    return this->tuples[scan_index++];
+    DbTuple<NumAttr> tuple = this->tuples[scan_index++];
+    return tuple.getData();
 
 }
 

@@ -20,6 +20,7 @@ include_directories(src/includes)
 
 file(GLOB code_files
         "src/*.cpp"
+        "src/*.tpp"
         "src/includes/*.h"
         )
 
