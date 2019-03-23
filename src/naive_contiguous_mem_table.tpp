@@ -2,8 +2,8 @@
 // Created by tejun on 3/18/2019.
 //
 
-#include "naive_table.h"
-#include "naive_tuple_group.h"
+#include "naive_contiguous_mem_table.h"
+#include "naive_contiguous_mem_tuple_group.h"
 
 #include <assert.h>
 #include <stdexcept>
@@ -12,7 +12,8 @@
 
 template<int NumAttr>
 template<int PrevNumAttr>
-NaiveTable<NumAttr>::NaiveTable(NaiveTable<PrevNumAttr> &toCopy) : num_tuple_groups_filled(0), scan_index(0) {
+NaiveContiguousMemTable<NumAttr>::NaiveContiguousMemTable(NaiveContiguousMemTable<PrevNumAttr> &toCopy)
+        : num_tuple_groups_filled(0), scan_index(0) {
     // TODO @sai, copy all tuple groups into this instance
     // Make sure to use the copy constructor of the NaiveTupleGroups
 }
@@ -20,10 +21,10 @@ NaiveTable<NumAttr>::NaiveTable(NaiveTable<PrevNumAttr> &toCopy) : num_tuple_gro
 //////// DML Operations ////////
 
 template<int NumAttr>
-void NaiveTable<NumAttr>::addTuple(std::array<int, NumAttr> data) {
+void NaiveContiguousMemTable<NumAttr>::addTuple(std::array<int, NumAttr> data) {
 
     // Check if the last tuple group has space for this tuple
-    NaiveTupleGroup<NumAttr> &last_tuple_group = this->tuple_groups[this->num_tuple_groups_filled];
+    NaiveContiguousMemTupleGroup<NumAttr> &last_tuple_group = this->tuple_groups[this->num_tuple_groups_filled];
     if (!last_tuple_group.isFull()) {
 
         // Has space, directly push to it
@@ -40,27 +41,27 @@ void NaiveTable<NumAttr>::addTuple(std::array<int, NumAttr> data) {
     this->num_tuple_groups_filled++;
 
     // Get next tuple
-    NaiveTupleGroup<NumAttr> &next_tuple_group = this->tuple_groups[this->num_tuple_groups_filled];
+    NaiveContiguousMemTupleGroup<NumAttr> &next_tuple_group = this->tuple_groups[this->num_tuple_groups_filled];
 
     // Push tuple to this new tuple group
     next_tuple_group.addTuple(data);
 }
 
 template<int NumAttr>
-void NaiveTable<NumAttr>::startScan() {
+void NaiveContiguousMemTable<NumAttr>::startScan() {
 
     // Reset scan index to point to first tuple group
     this->scan_index = 0;
 
     // Reset scan index in all tuple groups
-    for (NaiveTupleGroup<NumAttr> group : this->tuple_groups) {
+    for (NaiveContiguousMemTupleGroup<NumAttr> group : this->tuple_groups) {
         group.startScan();
     }
 
 }
 
 template<int NumAttr>
-std::array<int, NumAttr> &NaiveTable<NumAttr>::getNextTuple() {
+std::array<int, NumAttr> &NaiveContiguousMemTable<NumAttr>::getNextTuple() {
 
     while (true) {
 
@@ -72,7 +73,7 @@ std::array<int, NumAttr> &NaiveTable<NumAttr>::getNextTuple() {
         try {
 
             // Try to scan the current tuple group
-            NaiveTupleGroup<NumAttr> &curr_tuple_group = this->tuple_groups[this->scan_index];
+            NaiveContiguousMemTupleGroup<NumAttr> &curr_tuple_group = this->tuple_groups[this->scan_index];
             return curr_tuple_group.getNextTuple();
 
         } catch (const std::length_error &e) {
@@ -87,6 +88,6 @@ std::array<int, NumAttr> &NaiveTable<NumAttr>::getNextTuple() {
 //////// Other ////////
 
 template<int NumAttr>
-bool NaiveTable<NumAttr>::isFull() const {
+bool NaiveContiguousMemTable<NumAttr>::isFull() const {
     return this->num_tuple_groups_filled >= NUMBER_TUPLE_GROUPS;
 }

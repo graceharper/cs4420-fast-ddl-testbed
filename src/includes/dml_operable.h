@@ -26,7 +26,6 @@ public:
 
     /**
      * Add a tuple of data to the given data structure.
-     * Note tuples can only be added before running the DDL operation.
      *
      * @param data a list of column values
      */
