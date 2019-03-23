@@ -21,9 +21,8 @@ NaiveContiguousMemTable<NumAttr>::NaiveContiguousMemTable(NaiveContiguousMemTabl
         // Extract actual tuple
         NaiveContiguousMemTupleGroup<PrevNumAttr> &to_copy_tuple_group = toCopy.getTupleGroupAtIndex(i);
 
-        // Copy directly into array FIXME
-        NaiveContiguousMemTupleGroup<NumAttr> new_tuple_group(to_copy_tuple_group);
-        this->tuple_groups[i] = new_tuple_group;
+        // Copy directly into array
+        this->tuple_groups[i] = to_copy_tuple_group;
     }
 
 }

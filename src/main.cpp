@@ -42,7 +42,6 @@ int main() {
     bigTable.addTuple({4, 4, 4, 4, 4, 4, 4, 4});
     std::cout << "Added tuples to big table" << std::endl;
 
-    // FIXME this won't work until DDL operation is implemented @sai
     // Scan again
     bigTable.startScan();
     for (int i = 0; i < 4; i++) {
