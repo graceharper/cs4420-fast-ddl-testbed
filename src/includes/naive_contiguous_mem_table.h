@@ -13,7 +13,11 @@
 #include <array>
 
 /**
- * A naive table implementation. On DDL operation (copy constructor):
+ * A naive table implementation.
+ *
+ * Stores entire table in contiguous memory. All tuples are contiguous, even between tuple groups.
+ *
+ * On DDL operation (copy constructor):
  * - Locks the entire table
  * - Copies each tuple group into new tuple groups
  * - Does an atomic swap (across all tuple groups) after copying is done

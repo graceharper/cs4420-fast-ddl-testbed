@@ -2,7 +2,7 @@
 // Created by tejun on 3/18/2019.
 //
 
-#include "naive_table.h"
+#include "naive_contiguous_mem_table.h"
 #include "db_tuple.h"
 
 #include <iostream>
