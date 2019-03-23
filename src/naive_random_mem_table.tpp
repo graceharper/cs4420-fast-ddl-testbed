@@ -13,9 +13,20 @@
 template<int NumAttr>
 template<int PrevNumAttr>
 NaiveRandomMemTable<NumAttr>::NaiveRandomMemTable(NaiveRandomMemTable<PrevNumAttr> &toCopy)
-        : num_tuple_groups_filled(0), scan_index(0) {
+        : last_tuple_group_index(toCopy.getLastTupleGroupIndex()), scan_index(0) {
 
-    // TODO
+    // Copy actual tuples groups directly. Note memory is NOT pre-allocated
+    for (int i = 0; i <= toCopy.getLastTupleGroupIndex(); i++) {
+
+        // Extract actual tuple
+        NaiveContiguousMemTupleGroup<PrevNumAttr> *to_copy_tuple_group = toCopy.getTupleGroupAtIndex(i);
+
+        // Copy into pointer
+        auto new_tuple_group_ptr = std::make_unique<NaiveContiguousMemTupleGroup<NumAttr>>(*to_copy_tuple_group);
+
+        // Copy directly into array
+        this->tuple_groups[i] = std::move(new_tuple_group_ptr);
+    }
 
 }
 
@@ -25,11 +36,11 @@ template<int NumAttr>
 void NaiveRandomMemTable<NumAttr>::addTuple(std::array<int, NumAttr> data) {
 
     // Check if the last tuple group has space for this tuple
-    NaiveContiguousMemTupleGroup<NumAttr> &last_tuple_group = this->tuple_groups[this->num_tuple_groups_filled];
-    if (!last_tuple_group.isFull()) {
+    NaiveContiguousMemTupleGroup<NumAttr> *last_tuple_group = this->getTupleGroupAtIndex(this->last_tuple_group_index);
+    if (!last_tuple_group->isFull()) {
 
         // Has space, directly push to it
-        last_tuple_group.addTuple(data);
+        last_tuple_group->addTuple(data);
         return;
 
     }
@@ -39,13 +50,17 @@ void NaiveRandomMemTable<NumAttr>::addTuple(std::array<int, NumAttr> data) {
     assert(!this->isFull());
 
     // Move pointer
-    this->num_tuple_groups_filled++;
+    this->last_tuple_group_index++;
 
-    // Get next tuple
-    NaiveContiguousMemTupleGroup<NumAttr> &next_tuple_group = this->tuple_groups[this->num_tuple_groups_filled];
+    // Init tuple group
+    auto new_tuple_group_ptr = std::make_unique<NaiveContiguousMemTupleGroup<NumAttr>>();
 
     // Push tuple to this new tuple group
-    next_tuple_group.addTuple(data);
+    new_tuple_group_ptr->addTuple(data);
+
+    // Store tuple group in table
+    this->tuple_groups[this->last_tuple_group_index] = std::move(new_tuple_group_ptr);
+
 }
 
 template<int NumAttr>
@@ -55,8 +70,9 @@ void NaiveRandomMemTable<NumAttr>::startScan() {
     this->scan_index = 0;
 
     // Reset scan index in all tuple groups
-    for (NaiveContiguousMemTupleGroup<NumAttr> group : this->tuple_groups) {
-        group.startScan();
+    for (int i = 0; i <= this->last_tuple_group_index; i++) {
+        NaiveContiguousMemTupleGroup<NumAttr> *tuple_group = this->getTupleGroupAtIndex(i);
+        tuple_group->startScan();
     }
 
 }
@@ -67,15 +83,15 @@ std::array<int, NumAttr> &NaiveRandomMemTable<NumAttr>::getNextTuple() {
     while (true) {
 
         // Check if there are no more tuple groups to scan
-        if (this->scan_index > this->num_tuple_groups_filled) {
+        if (this->scan_index > this->last_tuple_group_index) {
             throw std::length_error("No more tuple groups to scan in table");
         }
 
         try {
 
             // Try to scan the current tuple group
-            NaiveContiguousMemTupleGroup<NumAttr> &curr_tuple_group = this->tuple_groups[this->scan_index];
-            return curr_tuple_group.getNextTuple();
+            NaiveContiguousMemTupleGroup<NumAttr> *curr_tuple_group = this->getTupleGroupAtIndex(this->scan_index);
+            return curr_tuple_group->getNextTuple();
 
         } catch (const std::length_error &e) {
 
@@ -90,5 +106,22 @@ std::array<int, NumAttr> &NaiveRandomMemTable<NumAttr>::getNextTuple() {
 
 template<int NumAttr>
 bool NaiveRandomMemTable<NumAttr>::isFull() const {
-    return this->num_tuple_groups_filled >= NUMBER_TUPLE_GROUPS;
+    return this->last_tuple_group_index >= NUMBER_TUPLE_GROUPS;
+}
+
+//////// Getters ////////
+
+template<int NumAttr>
+int NaiveRandomMemTable<NumAttr>::getLastTupleGroupIndex() const {
+    return last_tuple_group_index;
+}
+
+template<int NumAttr>
+int NaiveRandomMemTable<NumAttr>::getScanIndex() const {
+    return scan_index;
+}
+
+template<int NumAttr>
+NaiveContiguousMemTupleGroup<NumAttr> *NaiveRandomMemTable<NumAttr>::getTupleGroupAtIndex(int i) {
+    return this->tuple_groups[i].get();
 }

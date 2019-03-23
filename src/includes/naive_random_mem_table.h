@@ -14,7 +14,8 @@
 #include <memory>
 
 /**
- * Tuple groups are not stored contiguously. Instead, they are created when needed (running out of space).
+ * Tuple groups are not stored contiguously.
+ * Instead, they are created when needed (when a previous tuple group doesn't have space for a new tuple).
  *
  * On DDL operation (copy constructor):
  * - Locks the entire table
@@ -43,12 +44,20 @@ public:
 
     bool isFull() const;
 
+    // Getters
+
+    NaiveContiguousMemTupleGroup<NumAttr> *getTupleGroupAtIndex(int i);
+
+    int getLastTupleGroupIndex() const;
+
+    int getScanIndex() const;
+
 protected:
 
     // Default-initialization of array
     std::array<std::unique_ptr<NaiveContiguousMemTupleGroup<NumAttr>>, NUMBER_TUPLE_GROUPS> tuple_groups;
 
-    int num_tuple_groups_filled;
+    int last_tuple_group_index;
 
     int scan_index;
 

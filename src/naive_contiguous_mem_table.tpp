@@ -63,7 +63,7 @@ void NaiveContiguousMemTable<NumAttr>::startScan() {
     this->scan_index = 0;
 
     // Reset scan index in all tuple groups
-    for (NaiveContiguousMemTupleGroup<NumAttr> group : this->tuple_groups) {
+    for (NaiveContiguousMemTupleGroup<NumAttr> &group : this->tuple_groups) {
         group.startScan();
     }
 
