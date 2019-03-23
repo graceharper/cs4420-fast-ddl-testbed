@@ -33,20 +33,20 @@ int main() {
         std::cout << "No more tuples, as expected" << std::endl;
     }
 
-    // Make a new table of 7 columns that copies everything from the smaller table
+    // Make a new table of 8 columns that copies everything from the smaller table
     // Since this is a "naive" table, its expected that EVERYTHING is copied right now
-    NaiveContiguousMemTable<7> bigTable(smallTable);
+    NaiveContiguousMemTable<8> bigTable(smallTable);
     std::cout << "Copied small table to big table" << std::endl;
 
-    // Add another tuple (this time with 7 columns)
-    bigTable.addTuple({4, 4, 4, 4, 4, 4, 4});
+    // Add another tuple (this time with 8 columns)
+    bigTable.addTuple({4, 4, 4, 4, 4, 4, 4, 4});
     std::cout << "Added tuples to big table" << std::endl;
 
     // FIXME this won't work until DDL operation is implemented @sai
     // Scan again
     bigTable.startScan();
     for (int i = 0; i < 4; i++) {
-        std::array<int, 7> &tuple_out = bigTable.getNextTuple();
+        std::array<int, 8> &tuple_out = bigTable.getNextTuple();
         std::cout << "Tuple " << i << " is at memory address " << tuple_out.data() << std::endl;
     }
 

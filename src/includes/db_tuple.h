@@ -16,6 +16,9 @@ public:
 
     DbTuple() = default;
 
+    template<int PrevNumAttr>
+    DbTuple(DbTuple<PrevNumAttr> &toCopy);
+
     void setData(std::array<int, NumAttr> data);
 
     /**

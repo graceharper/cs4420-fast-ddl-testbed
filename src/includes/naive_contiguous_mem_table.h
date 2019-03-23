@@ -42,12 +42,20 @@ public:
 
     bool isFull() const;
 
+    // Getters
+
+    NaiveContiguousMemTupleGroup<NumAttr> &getTupleGroupAtIndex(int i);
+
+    int getLastTupleGroupIndex() const;
+
+    int getScanIndex() const;
+
 protected:
 
     // Default-initialization of array
     std::array<NaiveContiguousMemTupleGroup<NumAttr>, NUMBER_TUPLE_GROUPS> tuple_groups;
 
-    int num_tuple_groups_filled;
+    int last_tuple_group_index;
 
     int scan_index;
 
