@@ -3,6 +3,7 @@
 //
 
 #include "naive_contiguous_mem_table.h"
+#include "naive_random_mem_table.h"
 #include "db_tuple.h"
 
 #include <iostream>

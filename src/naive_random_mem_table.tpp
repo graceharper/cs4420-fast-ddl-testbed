@@ -8,6 +8,20 @@
 #include <assert.h>
 #include <stdexcept>
 
+//////// Constructor ////////
+
+template<int NumAttr>
+NaiveRandomMemTable<NumAttr>::NaiveRandomMemTable()
+        : last_tuple_group_index(0), scan_index(0) {
+
+    // Allocate space for the first tuple group. Init tuple group
+    auto new_tuple_group_ptr = std::make_unique<NaiveContiguousMemTupleGroup<NumAttr>>();
+
+    // Store tuple group in table
+    this->tuple_groups[0] = std::move(new_tuple_group_ptr);
+
+}
+
 //////// DDL Operations ////////
 
 template<int NumAttr>

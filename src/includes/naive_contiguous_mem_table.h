@@ -55,9 +55,9 @@ protected:
     // Default-initialization of array
     std::array<NaiveContiguousMemTupleGroup<NumAttr>, NUMBER_TUPLE_GROUPS> tuple_groups;
 
-    int last_tuple_group_index;
+    int last_tuple_group_index = 0;
 
-    int scan_index;
+    int scan_index = 0;
 
 };
 
