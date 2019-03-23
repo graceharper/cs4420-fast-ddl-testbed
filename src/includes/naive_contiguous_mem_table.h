@@ -8,13 +8,11 @@
 
 #include "dml_operable.h"
 #include "constants.h"
-#include "naive_tuple_group.h"
+#include "naive_contiguous_mem_tuple_group.h"
 
 #include <array>
 
 /**
- * A naive table implementation.
- *
  * Stores entire table in contiguous memory. All tuples are contiguous, even between tuple groups.
  *
  * On DDL operation (copy constructor):
@@ -24,17 +22,17 @@
  * - Unlocks the entire table
  */
 template<int NumAttr>
-class NaiveTable :
+class NaiveContiguousMemTable :
         public virtual DmlOperable<NumAttr> {
 
 public:
 
-    NaiveTable() = default;
+    NaiveContiguousMemTable() = default;
 
-    ~NaiveTable() override = default;
+    ~NaiveContiguousMemTable() override = default;
 
     template<int PrevNumAttr>
-    NaiveTable(NaiveTable<PrevNumAttr> &toCopy);
+    NaiveContiguousMemTable(NaiveContiguousMemTable<PrevNumAttr> &toCopy);
 
     void addTuple(std::array<int, NumAttr> data) override;
 
@@ -47,7 +45,7 @@ public:
 protected:
 
     // Default-initialization of array
-    std::array<NaiveTupleGroup<NumAttr>, NUMBER_TUPLE_GROUPS> tuple_groups;
+    std::array<NaiveContiguousMemTupleGroup<NumAttr>, NUMBER_TUPLE_GROUPS> tuple_groups;
 
     int num_tuple_groups_filled;
 
@@ -56,4 +54,4 @@ protected:
 };
 
 // Link to template implementation
-#include "naive_table.tpp"
+#include "naive_contiguous_mem_table.tpp"

@@ -11,22 +11,24 @@
 #pragma once
 
 /**
- * A naive tuple group implementation. On DDL operation (copy constructor):
+ * Stores all tuples in contiguous memory. Memory is pre-allocated at compile time.
+ *
+ * On DDL operation (copy constructor):
  * - Copies each tuple into new tuples
  * - Does an atomic swap (across all tuples) after copying is done
  */
 template<int NumAttr>
-class NaiveTupleGroup :
+class NaiveContiguousMemTupleGroup :
         public virtual DmlOperable<NumAttr> {
 
 public:
 
-    NaiveTupleGroup() = default;
+    NaiveContiguousMemTupleGroup() = default;
 
-    ~NaiveTupleGroup() override = default;
+    ~NaiveContiguousMemTupleGroup() override = default;
 
     template<int PrevNumAttr>
-    NaiveTupleGroup(NaiveTupleGroup<PrevNumAttr> &toCopy);
+    NaiveContiguousMemTupleGroup(NaiveContiguousMemTupleGroup<PrevNumAttr> &toCopy);
 
     void addTuple(std::array<int, NumAttr> data) override;
 
@@ -48,5 +50,5 @@ protected:
 };
 
 // Link to template implementation
-#include "naive_tuple_group.tpp"
+#include "naive_contiguous_mem_tuple_group.tpp"
 

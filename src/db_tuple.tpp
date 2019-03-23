@@ -15,10 +15,3 @@ template<int NumAttr>
 void DbTuple<NumAttr>::setData(std::array<int, NumAttr> data) {
     this->data = data;
 }
-
-// Example usages needed for linking!
-template
-class DbTuple<4>;
-
-template
-class DbTuple<7>;
