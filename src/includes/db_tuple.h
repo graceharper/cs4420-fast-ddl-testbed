@@ -12,9 +12,10 @@ class DbTuple {
 
 public:
 
-    // TODO add any metadata here as well
-
     DbTuple() = default;
+
+    template<int PrevNumAttr>
+    DbTuple(DbTuple<PrevNumAttr> &toCopy);
 
     void setData(std::array<int, NumAttr> data);
 

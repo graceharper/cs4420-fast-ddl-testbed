@@ -1,5 +1,5 @@
 //
-// Created by tejun on 3/18/2019.
+// Created by tejun on 3/23/2019.
 //
 
 
@@ -11,9 +11,11 @@
 #include "naive_contiguous_mem_tuple_group.h"
 
 #include <array>
+#include <memory>
 
 /**
- * Stores entire table in contiguous memory. All tuples are contiguous, even between tuple groups.
+ * Tuple groups are not stored contiguously.
+ * Instead, they are created when needed (when a previous tuple group doesn't have space for a new tuple).
  *
  * On DDL operation (copy constructor):
  * - Locks the entire table
@@ -22,17 +24,17 @@
  * - Unlocks the entire table
  */
 template<int NumAttr>
-class NaiveContiguousMemTable :
+class NaiveRandomMemTable :
         public virtual DmlOperable<NumAttr> {
 
 public:
 
-    NaiveContiguousMemTable() = default;
+    NaiveRandomMemTable();
 
-    ~NaiveContiguousMemTable() override = default;
+    ~NaiveRandomMemTable() override = default;
 
     template<int PrevNumAttr>
-    NaiveContiguousMemTable(NaiveContiguousMemTable<PrevNumAttr> &toCopy);
+    NaiveRandomMemTable(NaiveRandomMemTable<PrevNumAttr> &toCopy);
 
     void addTuple(std::array<int, NumAttr> data) override;
 
@@ -44,7 +46,7 @@ public:
 
     // Getters
 
-    NaiveContiguousMemTupleGroup<NumAttr> &getTupleGroupAtIndex(int i);
+    NaiveContiguousMemTupleGroup<NumAttr> *getTupleGroupAtIndex(int i);
 
     int getLastTupleGroupIndex() const;
 
@@ -53,7 +55,7 @@ public:
 protected:
 
     // Default-initialization of array
-    std::array<NaiveContiguousMemTupleGroup<NumAttr>, NUMBER_TUPLE_GROUPS> tuple_groups;
+    std::array<std::unique_ptr<NaiveContiguousMemTupleGroup<NumAttr>>, NUMBER_TUPLE_GROUPS> tuple_groups;
 
     int last_tuple_group_index = 0;
 
@@ -62,4 +64,4 @@ protected:
 };
 
 // Link to template implementation
-#include "naive_contiguous_mem_table.tpp"
+#include "naive_random_mem_table.tpp"

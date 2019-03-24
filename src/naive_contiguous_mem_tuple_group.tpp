@@ -11,8 +11,19 @@
 template<int NumAttr>
 template<int PrevNumAttr>
 NaiveContiguousMemTupleGroup<NumAttr>::NaiveContiguousMemTupleGroup(NaiveContiguousMemTupleGroup<PrevNumAttr> &toCopy)
-        : num_tuples_filled(0), scan_index(0) {
-    // TODO @sai, copy all tuples into this instance
+        : last_tuple_index(toCopy.getLastTupleIndex()), scan_index(0) {
+
+    // Copy actual tuples directly. Note memory is already pre-allocated, just overwrite
+    for (int i = 0; i <= toCopy.getLastTupleIndex(); i++) {
+
+        // Extract actual tuple
+        DbTuple<PrevNumAttr> &to_copy_tuple = toCopy.getTupleAtIndex(i);
+
+        // Copy directly into array
+        this->tuples[i] = to_copy_tuple;
+
+    }
+
 }
 
 //////// DML Operations ////////
@@ -24,13 +35,13 @@ void NaiveContiguousMemTupleGroup<NumAttr>::addTuple(std::array<int, NumAttr> da
     assert(!this->isFull());
 
     // Get tuple
-    DbTuple<NumAttr> &tuple = this->tuples[this->num_tuples_filled];
+    DbTuple<NumAttr> &tuple = this->tuples[this->last_tuple_index];
 
     // Store data
     tuple.setData(data);
 
     // Increment index
-    this->num_tuples_filled++;
+    this->last_tuple_index++;
 }
 
 template<int NumAttr>
@@ -45,7 +56,7 @@ template<int NumAttr>
 std::array<int, NumAttr> &NaiveContiguousMemTupleGroup<NumAttr>::getNextTuple() {
 
     // Check if there are no more tuples to scan
-    if (this->scan_index >= this->num_tuples_filled) {
+    if (this->scan_index >= this->last_tuple_index) {
         throw std::length_error("No more tuples to scan in tuple group");
     }
 
@@ -59,5 +70,22 @@ std::array<int, NumAttr> &NaiveContiguousMemTupleGroup<NumAttr>::getNextTuple() 
 
 template<int NumAttr>
 bool NaiveContiguousMemTupleGroup<NumAttr>::isFull() const {
-    return this->num_tuples_filled >= NUMBER_TUPLES_PER_GROUP;
+    return this->last_tuple_index >= NUMBER_TUPLES_PER_GROUP;
+}
+
+//////// Getters ////////
+
+template<int NumAttr>
+int NaiveContiguousMemTupleGroup<NumAttr>::getLastTupleIndex() const {
+    return last_tuple_index;
+}
+
+template<int NumAttr>
+int NaiveContiguousMemTupleGroup<NumAttr>::getScanIndex() const {
+    return scan_index;
+}
+
+template<int NumAttr>
+DbTuple<NumAttr> &NaiveContiguousMemTupleGroup<NumAttr>::getTupleAtIndex(int i) {
+    return this->tuples[i];
 }

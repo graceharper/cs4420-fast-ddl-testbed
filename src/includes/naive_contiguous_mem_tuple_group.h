@@ -38,12 +38,20 @@ public:
 
     bool isFull() const;
 
+    // Getters
+
+    DbTuple<NumAttr> &getTupleAtIndex(int i);
+
+    int getLastTupleIndex() const;
+
+    int getScanIndex() const;
+
 protected:
 
     // Default-initialization of array
     std::array<DbTuple<NumAttr>, NUMBER_TUPLES_PER_GROUP> tuples;
 
-    int num_tuples_filled = 0;
+    int last_tuple_index = 0;
 
     int scan_index = 0;
 
