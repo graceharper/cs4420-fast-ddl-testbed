@@ -44,5 +44,4 @@ public:
      * @throws length_error if no more tuples to get
      */
     virtual std::array<int, NumAttr> &getNextTuple() = 0;
-
 };

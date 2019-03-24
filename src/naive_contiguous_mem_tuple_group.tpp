@@ -37,7 +37,7 @@ void NaiveContiguousMemTupleGroup<NumAttr>::addTuple(std::array<int, NumAttr> da
     // Get tuple
     DbTuple<NumAttr> &tuple = this->tuples[this->last_tuple_index];
 
-    // Store data
+    // Store data    ~DDLTest() = default;
     tuple.setData(data);
 
     // Increment index

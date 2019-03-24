@@ -101,6 +101,9 @@ bool NaiveContiguousMemTable<NumAttr>::isFull() const {
     return this->last_tuple_group_index >= NUMBER_TUPLE_GROUPS;
 }
 
+
+
+
 //////// Getters ////////
 
 template<int NumAttr>

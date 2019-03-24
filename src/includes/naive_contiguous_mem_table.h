@@ -40,14 +40,12 @@ public:
 
     std::array<int, NumAttr> &getNextTuple() override;
 
+    //Others
     bool isFull() const;
 
     // Getters
-
-    NaiveContiguousMemTupleGroup<NumAttr> &getTupleGroupAtIndex(int i);
-
     int getLastTupleGroupIndex() const;
-
+    NaiveContiguousMemTupleGroup<NumAttr>& getTupleGroupAtIndex(int i);
     int getScanIndex() const;
 
 protected:
