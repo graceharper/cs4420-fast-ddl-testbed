@@ -4,5 +4,5 @@
 
 #pragma once
 
-constexpr int SMALL_NUM_COLS = 100;
-constexpr int BIG_NUM_COLS = 200;
+constexpr int SMALL_NUM_COLS = 1024;     // 2^10 = 1 KB
+constexpr int BIG_NUM_COLS = 2 * 1024;   // 2^11 = 2 KB
