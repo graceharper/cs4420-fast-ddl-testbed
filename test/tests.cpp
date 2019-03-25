@@ -40,12 +40,6 @@ void addTuples(NaiveContiguousMemTable<NumCols> &table) {
     auto added = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> q1time = added - startq1;
 
-    //run ddl
-    auto startDDL = std::chrono::high_resolution_clock::now();
-    NaiveContiguousMemTable<SMALL_NUM_COLS> newTable(table);
-    auto endDDl = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> rDDLtime = endDDl - startDDL;
-
     //query after ddl
     auto startq2 = std::chrono::high_resolution_clock::now();
     table.addTuple(defaultTuple);
@@ -53,7 +47,6 @@ void addTuples(NaiveContiguousMemTable<NumCols> &table) {
     std::chrono::duration<double> q2time = endq2 - startq2;
 
     LOG("Query 1 Time:" << q1time.count());
-    LOG("DDL Time: " << rDDLtime.count());
     LOG("Query 2 Time: " << q2time.count());
 
 }
@@ -80,14 +73,7 @@ void scanTuples(NaiveContiguousMemTable<NumCols> &table) {
     }
     auto added = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> q1time = added - startq1;
-
-    //run ddl
-    auto startDDL = std::chrono::high_resolution_clock::now();
-    NaiveContiguousMemTable<SMALL_NUM_COLS> newTable(table);
-    auto endDDl = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> rDDLtime = endDDl - startDDL;
     LOG("Query 1 Time:" << q1time.count());
-    LOG("DDL Time: " << rDDLtime.count());
 }
 
 void NaiveContMemTest(const int numRows) {
@@ -105,7 +91,13 @@ void NaiveContMemTest(const int numRows) {
     scanTuples(smallTable);
 
     // Perform ddl with benchmarks
+    const auto startDdl = std::chrono::high_resolution_clock::now();
+
     NaiveContiguousMemTable<BIG_NUM_COLS> bigTable(smallTable);
+
+    const auto endDdl = std::chrono::high_resolution_clock::now();
+    const std::chrono::duration<double> rDdlTime = endDdl - startDdl;
+    LOG("DDL Time: " << rDdlTime.count());
 
     // Benchmark operations again
     scanTuples(bigTable);

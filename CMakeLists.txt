@@ -24,7 +24,7 @@ file(GLOB code_files
         "src/includes/*.h"
         )
 
-add_library(stagdb_lib ${code_files} test/testing_constants.h)
+add_library(stagdb_lib ${code_files})
 add_executable(stagdb_main src/main.cpp)
 
 target_link_libraries(stagdb_main stagdb_lib)

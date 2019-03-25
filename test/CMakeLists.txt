@@ -35,11 +35,11 @@ include_directories(${CMAKE_SOURCE_DIR}/src/include
 
 file(GLOB code_files
         "*.cpp"
-        "*.cc"
+        "*.h"
         )
 
 # ---[ TEST SUITE
-add_executable(test_suite tests.cpp)
+add_executable(test_suite ${code_files})
 
 target_link_libraries(test_suite stagdb_lib gtest_main)
 add_test(NAME TestSuite COMMAND test_suite)
