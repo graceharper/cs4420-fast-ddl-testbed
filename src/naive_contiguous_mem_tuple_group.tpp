@@ -14,7 +14,7 @@ NaiveContiguousMemTupleGroup<NumAttr>::NaiveContiguousMemTupleGroup(NaiveContigu
         : last_tuple_index(toCopy.getLastTupleIndex()), scan_index(0) {
 
     // Copy actual tuples directly. Note memory is already pre-allocated, just overwrite
-    for (int i = 0; i <= toCopy.getLastTupleIndex(); i++) {
+    for (int i = 0; i < toCopy.getLastTupleIndex(); i++) {
 
         // Extract actual tuple
         DbTuple<PrevNumAttr> &to_copy_tuple = toCopy.getTupleAtIndex(i);
