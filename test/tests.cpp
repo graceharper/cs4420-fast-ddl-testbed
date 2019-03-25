@@ -63,8 +63,8 @@ void addTuples(TableType<NumCols> &table) {
  * Scans all tuples in the table.
  * Benchmarks time to scan a tuple.
  */
-template<template<int> typename TableType, int NumCols>
-void scanTuples(TableType<NumCols> &table) {
+template<template<int> typename TableType, int NumCols, int PrevNumCols>
+void scanTuples(TableType<NumCols> &table, TableType<PrevNumCols> &small_table) {
 
     auto startScan = std::chrono::high_resolution_clock::now();
     table.startScan();
@@ -89,6 +89,35 @@ void scanTuples(TableType<NumCols> &table) {
     LOG("Query tuples from table (ms):\t" << scanTime.count() * 1000);
 }
 
+/**
+ * Template specialization for Aurora after DDL.
+ */
+template<>
+void scanTuples<AuroraTable>(AuroraTable<BIG_NUM_COLS> &table, AuroraTable<SMALL_NUM_COLS> &small_table) {
+
+    auto startScan = std::chrono::high_resolution_clock::now();
+    table.startScan();
+
+    for (int i = 0; i < NUM_TUPLES; i++) {
+        const std::array<int, BIG_NUM_COLS> &actual_tuple = table.getNextTuple(small_table);
+        const std::array<int, BIG_NUM_COLS> &expected_tuple = generateTuple<BIG_NUM_COLS>(i);
+        ASSERT_EQ(actual_tuple, expected_tuple) << "Durability broken...";
+    }
+
+    // Assert next scan throws exception
+    try {
+        table.getNextTuple(small_table);
+        FAIL() << "Did not throw exception when scanning for extra tuples";
+    } catch (const std::length_error &e) {
+        // Expected
+    }
+
+    auto endScan = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> scanTime = endScan - startScan;
+
+    LOG("Query tuples from table (ms):\t" << scanTime.count() * 1000);
+}
+
 template<template<int> typename TableType>
 void runTest() {
     // Set up table
@@ -96,7 +125,7 @@ void runTest() {
 
     // Benchmark operations
     addTuples(smallTable);
-    scanTuples(smallTable);
+    scanTuples(smallTable, smallTable);
 
     // Perform ddl with benchmarks
     const auto startDdl = std::chrono::high_resolution_clock::now();
@@ -109,7 +138,7 @@ void runTest() {
 
     // Benchmark operations again
     for (int i = 0; i < 5; i++) {
-        scanTuples(bigTable);
+        scanTuples(bigTable, smallTable);
     }
 }
 

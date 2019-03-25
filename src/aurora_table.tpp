@@ -12,7 +12,7 @@
 
 template<int NumAttr>
 AuroraTable<NumAttr>::AuroraTable()
-        : last_tuple_group_index(0), scan_index(0), to_copy_index(NUMBER_TUPLE_GROUPS) {
+        : last_tuple_group_index(0), scan_index(0), to_copy_index(NUMBER_TUPLE_GROUPS + 1) {
 
     // Allocate space for the first tuple group. Init tuple group
     auto new_tuple_group_ptr = std::make_unique<NaiveContiguousMemTupleGroup<NumAttr>>();

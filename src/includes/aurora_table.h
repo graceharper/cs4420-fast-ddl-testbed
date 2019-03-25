@@ -65,7 +65,7 @@ protected:
 
     int scan_index = 0;
 
-    int to_copy_index = NUMBER_TUPLE_GROUPS;
+    int to_copy_index = NUMBER_TUPLE_GROUPS + 1;
 
 };
 
