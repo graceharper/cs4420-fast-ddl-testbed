@@ -68,8 +68,8 @@ void AuroraTable<NumAttr>::startScan() {
     // Reset scan index to point to first tuple group
     this->scan_index = 0;
 
-    // Reset scan index in all tuple groups
-    for (int i = 0; i <= this->last_tuple_group_index; i++) {
+    // Reset scan index in all tuple groups (only if copy done)
+    for (int i = 0; i <= this->last_tuple_group_index && i < this->to_copy_index; i++) {
         NaiveContiguousMemTupleGroup<NumAttr> *tuple_group = this->getTupleGroupAtIndex(i);
         tuple_group->startScan();
     }
@@ -129,8 +129,14 @@ std::array<int, NumAttr> &AuroraTable<NumAttr>::getNextTuple(AuroraTable<PrevNum
                 auto new_tuple_group_ptr =
                         std::make_unique<NaiveContiguousMemTupleGroup<NumAttr>>(*to_copy_tuple_group);
 
+                // Reset scan index
+                new_tuple_group_ptr->startScan();
+
                 // Copy directly into array
                 this->tuple_groups[this->scan_index] = std::move(new_tuple_group_ptr);
+
+                // Increment index
+                this->to_copy_index++;
             }
 
             // Try to scan the current tuple group
