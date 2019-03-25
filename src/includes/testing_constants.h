@@ -1,9 +1,0 @@
-//
-// Created by grace on 3/24/19.
-//
-
-#ifndef STAGDB_TESTBED_TESTING_CONSTANTS_H
-#define STAGDB_TESTBED_TESTING_CONSTANTS_H
-constexpr int TABLESIZE = 10;
-
-#endif //STAGDB_TESTBED_TESTING_CONSTANTS_H
