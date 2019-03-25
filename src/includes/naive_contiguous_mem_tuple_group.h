@@ -2,7 +2,6 @@
 // Created by tejun on 3/18/2019.
 //
 
-#include "dml_operable.h"
 #include "db_tuple.h"
 #include "constants.h"
 
@@ -18,23 +17,22 @@
  * - Does an atomic swap (across all tuples) after copying is done
  */
 template<int NumAttr>
-class NaiveContiguousMemTupleGroup :
-        public virtual DmlOperable<NumAttr> {
+class NaiveContiguousMemTupleGroup {
 
 public:
 
     NaiveContiguousMemTupleGroup() = default;
 
-    ~NaiveContiguousMemTupleGroup() override = default;
+    ~NaiveContiguousMemTupleGroup() = default;
 
     template<int PrevNumAttr>
     NaiveContiguousMemTupleGroup(NaiveContiguousMemTupleGroup<PrevNumAttr> &toCopy);
 
-    void addTuple(std::array<int, NumAttr> data) override;
+    void addTuple(std::array<int, NumAttr> data);
 
-    void startScan() override;
+    void startScan();
 
-    std::array<int, NumAttr> &getNextTuple() override;
+    std::array<int, NumAttr> &getNextTuple();
 
     bool isFull() const;
 

@@ -2,11 +2,12 @@
 // Created by tejun on 3/18/2019.
 //
 
+#include <gtest/gtest.h>
 #include <iostream>
 #include <chrono>
 #include <array>
 
-#include <gtest/gtest.h>
+#include <aurora_table.h>
 #include "naive_contiguous_mem_table.h"
 #include "naive_random_mem_table.h"
 #include "testing_constants.h"
@@ -54,7 +55,7 @@ void addTuples(TableType<NumCols> &table) {
     const auto endAdd = std::chrono::high_resolution_clock::now();
     const std::chrono::duration<double> addTime = endAdd - startAdd;
 
-    LOG("Add tuples to table: " << addTime.count());
+    LOG("Add tuples to table (ms):\t\t" << addTime.count() * 1000);
 
 }
 
@@ -85,7 +86,7 @@ void scanTuples(TableType<NumCols> &table) {
     auto endScan = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> scanTime = endScan - startScan;
 
-    LOG("Query tuples from table: " << scanTime.count());
+    LOG("Query tuples from table (ms):\t" << scanTime.count() * 1000);
 }
 
 template<template<int> typename TableType>
@@ -104,11 +105,12 @@ void runTest() {
 
     const auto endDdl = std::chrono::high_resolution_clock::now();
     const std::chrono::duration<double> rDdlTime = endDdl - startDdl;
-    LOG("DDL to new table: " << rDdlTime.count());
+    LOG("DDL to new table (ms):\t\t\t" << rDdlTime.count() * 1000);
 
     // Benchmark operations again
-    scanTuples(bigTable);
-    scanTuples(bigTable);
+    for (int i = 0; i < 5; i++) {
+        scanTuples(bigTable);
+    }
 }
 
 TEST(DdlTest, NaiveContiguousMemory) {
@@ -119,6 +121,11 @@ TEST(DdlTest, NaiveContiguousMemory) {
 TEST(DdlTest, NaiveRandomMemory) {
     LOG("=== Naive Random Memory ===");
     runTest<NaiveRandomMemTable>();
+}
+
+TEST(DdlTest, Aurora) {
+    LOG("=== Naive Random Memory ===");
+    runTest<AuroraTable>();
 }
 
 int main(int argc, char **argv) {

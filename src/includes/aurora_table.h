@@ -23,22 +23,28 @@
  * - Unlocks the entire table
  */
 template<int NumAttr>
-class NaiveRandomMemTable {
+class AuroraTable {
 
 public:
 
-    NaiveRandomMemTable();
+    AuroraTable();
 
-    ~NaiveRandomMemTable() = default;
+    ~AuroraTable() = default;
 
     template<int PrevNumAttr>
-    NaiveRandomMemTable(NaiveRandomMemTable<PrevNumAttr> &toCopy);
+    AuroraTable(AuroraTable<PrevNumAttr> &toCopy);
 
     void addTuple(std::array<int, NumAttr> data);
 
     void startScan();
 
     std::array<int, NumAttr> &getNextTuple();
+
+    /**
+     * Must be used after a DDL operation
+     */
+    template<int PrevNumAttr>
+    std::array<int, NumAttr> &getNextTuple(AuroraTable<PrevNumAttr> &toCopy);
 
     bool isFull() const;
 
@@ -59,7 +65,9 @@ protected:
 
     int scan_index = 0;
 
+    int to_copy_index = NUMBER_TUPLE_GROUPS;
+
 };
 
 // Link to template implementation
-#include "naive_random_mem_table.tpp"
+#include "aurora_table.tpp"

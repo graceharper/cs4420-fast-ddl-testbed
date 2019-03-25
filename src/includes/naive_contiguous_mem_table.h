@@ -6,7 +6,6 @@
 #pragma once
 
 
-#include "dml_operable.h"
 #include "constants.h"
 #include "naive_contiguous_mem_tuple_group.h"
 
@@ -22,23 +21,22 @@
  * - Unlocks the entire table
  */
 template<int NumAttr>
-class NaiveContiguousMemTable :
-        public virtual DmlOperable<NumAttr> {
+class NaiveContiguousMemTable {
 
 public:
 
     NaiveContiguousMemTable() = default;
 
-    ~NaiveContiguousMemTable() override = default;
+    ~NaiveContiguousMemTable() = default;
 
     template<int PrevNumAttr>
     NaiveContiguousMemTable(NaiveContiguousMemTable<PrevNumAttr> &toCopy);
 
-    void addTuple(std::array<int, NumAttr> data) override;
+    void addTuple(std::array<int, NumAttr> data);
 
-    void startScan() override;
+    void startScan();
 
-    std::array<int, NumAttr> &getNextTuple() override;
+    std::array<int, NumAttr> &getNextTuple();
 
     //Others
     bool isFull() const;
