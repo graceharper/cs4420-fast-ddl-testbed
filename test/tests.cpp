@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <chrono>
+#include <array>
 
 #include <gtest/gtest.h>
 #include "naive_contiguous_mem_table.h"
@@ -17,15 +18,24 @@
 #define LOG(X) std::cout << X << std::endl
 
 
-std::array<int, SMALL_NUM_COLS> defaultTuple;
+/**
+ * Generates a tuple of the correct size, where all elements in the tuple are set the it's id.
+ *
+ * @return the tuple with the correct data set
+ */
+template<int NumCols>
+std::array<int, NumCols> generateTuple(int tupleId) {
 
-//initiates the default tuple that gets added during queries
-void setup() {
-    for (int i = 0; i < SMALL_NUM_COLS; i++) {
-        defaultTuple[i] = i;
+    std::array<int, NumCols> tuple = {};
+
+    // Set variables
+    for (int i = 0; i < NumCols; i++) {
+        tuple[i] = tupleId;
     }
-}
 
+    return tuple;
+
+}
 
 /**
  * Adds tuples to a table.
@@ -34,20 +44,17 @@ void setup() {
 template<int NumCols>
 void addTuples(NaiveContiguousMemTable<NumCols> &table) {
 
-    //query before ddl
-    auto startq1 = std::chrono::high_resolution_clock::now();
-    table.addTuple(defaultTuple);
-    auto added = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> q1time = added - startq1;
+    const auto startAdd = std::chrono::high_resolution_clock::now();
 
-    //query after ddl
-    auto startq2 = std::chrono::high_resolution_clock::now();
-    table.addTuple(defaultTuple);
-    auto endq2 = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> q2time = endq2 - startq2;
+    for (int i = 0; i < NUMBER_TUPLE_GROUPS * NUMBER_TUPLES_PER_GROUP; i++) {
+        const std::array<int, NumCols> tuple = generateTuple<NumCols>(i);
+        table.addTuple(tuple);
+    }
 
-    LOG("Query 1 Time:" << q1time.count());
-    LOG("Query 2 Time: " << q2time.count());
+    const auto endAdd = std::chrono::high_resolution_clock::now();
+    const std::chrono::duration<double> addTime = endAdd - startAdd;
+
+    LOG("Add tuples to table: " << addTime.count());
 
 }
 
@@ -58,32 +65,31 @@ void addTuples(NaiveContiguousMemTable<NumCols> &table) {
 template<int NumCols>
 void scanTuples(NaiveContiguousMemTable<NumCols> &table) {
 
-
-    //query before ddl
-    auto startq1 = std::chrono::high_resolution_clock::now();
+    auto startScan = std::chrono::high_resolution_clock::now();
     table.startScan();
-    //messy
-    while (true) {
-        try {
-            table.getNextTuple();
-        } catch (std::length_error &e) {
-            LOG(e.what());
-            break;
-        }
+
+    for (int i = 0; i < NUMBER_TUPLE_GROUPS * NUMBER_TUPLES_PER_GROUP; i++) {
+        const std::array<int, NumCols> &actual_tuple = table.getNextTuple();
+        const std::array<int, NumCols> &expected_tuple = generateTuple<NumCols>(i);
+        ASSERT_EQ(actual_tuple, expected_tuple) << "Durability broken...";
     }
-    auto added = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> q1time = added - startq1;
-    LOG("Query 1 Time:" << q1time.count());
+
+    // Assert next scan throws exception
+    try {
+        table.getNextTuple();
+        FAIL() << "Did not throw exception when scanning for extra tuples";
+    } catch (const std::length_error &e) {
+        // Expected
+    }
+
+    auto endScan = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> scanTime = endScan - startScan;
+
+    LOG("Query tuples from table: " << scanTime.count());
 }
 
-void NaiveContMemTest(const int numRows) {
-    //TODO multiple tables
-    if (numRows > (SMALL_NUM_COLS - 2)) {
-        std::cout << "too many rows requested" << std::endl;
-        return;
-    }
-
-    //set up table
+TEST(DdlTest, NaiveContiguousMemory) {
+    // Set up table
     NaiveContiguousMemTable<SMALL_NUM_COLS> smallTable;
 
     // Benchmark operations
@@ -102,12 +108,6 @@ void NaiveContMemTest(const int numRows) {
     // Benchmark operations again
     scanTuples(bigTable);
     scanTuples(bigTable);
-
-
-}
-
-TEST(DdlTest, testNaiveContiguousMem) {
-    NaiveContMemTest(4);
 }
 
 int main(int argc, char **argv) {
