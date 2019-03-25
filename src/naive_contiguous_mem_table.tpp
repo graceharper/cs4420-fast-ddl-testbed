@@ -18,11 +18,14 @@ NaiveContiguousMemTable<NumAttr>::NaiveContiguousMemTable(NaiveContiguousMemTabl
     // Copy actual tuples groups directly. Note memory is already pre-allocated, just overwrite
     for (int i = 0; i <= toCopy.getLastTupleGroupIndex(); i++) {
 
-        // Extract actual tuple
+        // Extract actual tuple group
         NaiveContiguousMemTupleGroup<PrevNumAttr> &to_copy_tuple_group = toCopy.getTupleGroupAtIndex(i);
 
-        // Copy directly into array
-        this->tuple_groups[i] = to_copy_tuple_group;
+        // Copy tuple group
+        NaiveContiguousMemTupleGroup<NumAttr> new_tuple_group(to_copy_tuple_group);
+
+        // Copy new tuple group into array
+        this->tuple_groups[i] = new_tuple_group;
     }
 
 }

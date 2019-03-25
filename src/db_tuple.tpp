@@ -10,12 +10,18 @@ template<int NumAttr>
 template<int PrevNumAttr>
 DbTuple<NumAttr>::DbTuple(DbTuple<PrevNumAttr> &toCopy) {
 
-    // Copy all data directly
     auto &to_copy_data = toCopy.getData();
 
+    // Copy all pre-existing data directly
     for (int i = 0; i < to_copy_data.size() && i < this->data.size(); i++) {
         this->data[i] = to_copy_data[i];
     }
+
+    // If extra columns, default them to the last column
+    for (int i = static_cast<int>(to_copy_data.size()); i < this->data.size(); i++) {
+        this->data[i] = to_copy_data[i - to_copy_data.size()];
+    }
+
 
 }
 

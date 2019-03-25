@@ -46,7 +46,7 @@ void addTuples(NaiveContiguousMemTable<NumCols> &table) {
 
     const auto startAdd = std::chrono::high_resolution_clock::now();
 
-    for (int i = 0; i < NUMBER_TUPLE_GROUPS * NUMBER_TUPLES_PER_GROUP; i++) {
+    for (int i = 0; i < NUM_TUPLES; i++) {
         const std::array<int, NumCols> tuple = generateTuple<NumCols>(i);
         table.addTuple(tuple);
     }
@@ -68,7 +68,7 @@ void scanTuples(NaiveContiguousMemTable<NumCols> &table) {
     auto startScan = std::chrono::high_resolution_clock::now();
     table.startScan();
 
-    for (int i = 0; i < NUMBER_TUPLE_GROUPS * NUMBER_TUPLES_PER_GROUP; i++) {
+    for (int i = 0; i < NUM_TUPLES; i++) {
         const std::array<int, NumCols> &actual_tuple = table.getNextTuple();
         const std::array<int, NumCols> &expected_tuple = generateTuple<NumCols>(i);
         ASSERT_EQ(actual_tuple, expected_tuple) << "Durability broken...";
@@ -103,7 +103,7 @@ TEST(DdlTest, NaiveContiguousMemory) {
 
     const auto endDdl = std::chrono::high_resolution_clock::now();
     const std::chrono::duration<double> rDdlTime = endDdl - startDdl;
-    LOG("DDL Time: " << rDdlTime.count());
+    LOG("DDL to new table: " << rDdlTime.count());
 
     // Benchmark operations again
     scanTuples(bigTable);

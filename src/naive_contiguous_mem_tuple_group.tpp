@@ -19,8 +19,11 @@ NaiveContiguousMemTupleGroup<NumAttr>::NaiveContiguousMemTupleGroup(NaiveContigu
         // Extract actual tuple
         DbTuple<PrevNumAttr> &to_copy_tuple = toCopy.getTupleAtIndex(i);
 
-        // Copy directly into array
-        this->tuples[i] = to_copy_tuple;
+        // Create new tuple
+        DbTuple<NumAttr> new_tuple(to_copy_tuple);
+
+        // Copy new tuple into array
+        this->tuples[i] = new_tuple;
 
     }
 
