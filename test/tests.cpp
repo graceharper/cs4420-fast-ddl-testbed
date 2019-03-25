@@ -41,8 +41,8 @@ std::array<int, NumCols> generateTuple(int tupleId) {
  * Adds tuples to a table.
  * Benchmarks average tuple addition time.
  */
-template<int NumCols>
-void addTuples(NaiveContiguousMemTable<NumCols> &table) {
+template<template<int> typename TableType, int NumCols>
+void addTuples(TableType<NumCols> &table) {
 
     const auto startAdd = std::chrono::high_resolution_clock::now();
 
@@ -62,8 +62,8 @@ void addTuples(NaiveContiguousMemTable<NumCols> &table) {
  * Scans all tuples in the table.
  * Benchmarks time to scan a tuple.
  */
-template<int NumCols>
-void scanTuples(NaiveContiguousMemTable<NumCols> &table) {
+template<template<int> typename TableType, int NumCols>
+void scanTuples(TableType<NumCols> &table) {
 
     auto startScan = std::chrono::high_resolution_clock::now();
     table.startScan();
@@ -88,9 +88,10 @@ void scanTuples(NaiveContiguousMemTable<NumCols> &table) {
     LOG("Query tuples from table: " << scanTime.count());
 }
 
-TEST(DdlTest, NaiveContiguousMemory) {
+template<template<int> typename TableType>
+void runTest() {
     // Set up table
-    NaiveContiguousMemTable<SMALL_NUM_COLS> smallTable;
+    TableType<SMALL_NUM_COLS> smallTable;
 
     // Benchmark operations
     addTuples(smallTable);
@@ -99,7 +100,7 @@ TEST(DdlTest, NaiveContiguousMemory) {
     // Perform ddl with benchmarks
     const auto startDdl = std::chrono::high_resolution_clock::now();
 
-    NaiveContiguousMemTable<BIG_NUM_COLS> bigTable(smallTable);
+    TableType<BIG_NUM_COLS> bigTable(smallTable);
 
     const auto endDdl = std::chrono::high_resolution_clock::now();
     const std::chrono::duration<double> rDdlTime = endDdl - startDdl;
@@ -108,6 +109,16 @@ TEST(DdlTest, NaiveContiguousMemory) {
     // Benchmark operations again
     scanTuples(bigTable);
     scanTuples(bigTable);
+}
+
+TEST(DdlTest, NaiveContiguousMemory) {
+    LOG("=== Naive Contiguous Memory ===");
+    runTest<NaiveContiguousMemTable>();
+}
+
+TEST(DdlTest, NaiveRandomMemory) {
+    LOG("=== Naive Random Memory ===");
+    runTest<NaiveRandomMemTable>();
 }
 
 int main(int argc, char **argv) {
