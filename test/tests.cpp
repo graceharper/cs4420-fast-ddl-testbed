@@ -95,14 +95,36 @@ void scanTuples(TableType<NumCols> &table, TableType<PrevNumCols> &small_table) 
 template<>
 void scanTuples<AuroraTable>(AuroraTable<BIG_NUM_COLS> &table, AuroraTable<SMALL_NUM_COLS> &small_table) {
 
-    auto startScan = std::chrono::high_resolution_clock::now();
+    // Keep track of metrics
+    std::chrono::duration<double> queryTimeMax(0);
+    std::chrono::duration<double> queryTimeAvg(0);
+    std::chrono::duration<double> queryTimeMin(999999);
+    std::chrono::duration<double> queryTimeTotal(0);
+
+    // Start scan
     table.startScan();
 
+    // Run through each tuple in scan
     for (int i = 0; i < NUM_TUPLES; i++) {
+
+        // Run query
+        auto startQuery = std::chrono::high_resolution_clock::now();
         const std::array<int, BIG_NUM_COLS> &actual_tuple = table.getNextTuple(small_table);
+        auto endQuery = std::chrono::high_resolution_clock::now();
+        const std::chrono::duration<double> queryTime = endQuery - startQuery;
+
+        // Durability check
         const std::array<int, BIG_NUM_COLS> &expected_tuple = generateTuple<BIG_NUM_COLS>(i);
         ASSERT_EQ(actual_tuple, expected_tuple) << "Durability broken...";
+
+        // Update metrics
+        queryTimeMax = std::max(queryTimeMax, queryTime);
+        queryTimeMin = std::min(queryTimeMin, queryTime);
+        queryTimeTotal += queryTime;
     }
+
+    // Calculate average
+    queryTimeAvg = queryTimeTotal / NUM_TUPLES;
 
     // Assert next scan throws exception
     try {
@@ -112,10 +134,10 @@ void scanTuples<AuroraTable>(AuroraTable<BIG_NUM_COLS> &table, AuroraTable<SMALL
         // Expected
     }
 
-    auto endScan = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> scanTime = endScan - startScan;
-
-    LOG("Query tuples from table (ms):\t" << scanTime.count() * 1000);
+    LOG("Query tuples from table (ms):\t" << queryTimeTotal.count() * 1000
+                                          << "\t" << queryTimeMax.count() * 1000
+                                          << "\t" << queryTimeAvg.count() * 1000
+                                          << "\t" << queryTimeMin.count() * 1000);
 }
 
 template<template<int> typename TableType>
@@ -153,7 +175,7 @@ TEST(DdlTest, NaiveRandomMemory) {
 }
 
 TEST(DdlTest, Aurora) {
-    LOG("=== Naive Random Memory ===");
+    LOG("=== Aurora Implementation ===");
     runTest<AuroraTable>();
 }
 
