@@ -192,20 +192,22 @@ void runTest() {
     for (int i = 0; i < 5; i++) {
         scanTuples(bigTable, smallTable, i);
     }
+
+    LOG("");
 }
 
 TEST(DdlTest, NaiveContiguousMemory) {
-    LOG("=== Naive Contiguous Memory ===");
+    LOG("========= Naive Contiguous Memory =========");
     runTest<NaiveContiguousMemTable>();
 }
 
 TEST(DdlTest, NaiveRandomMemory) {
-    LOG("=== Naive Random Memory ===");
+    LOG("========= Naive Random Memory =========");
     runTest<NaiveRandomMemTable>();
 }
 
 TEST(DdlTest, Aurora) {
-    LOG("=== Aurora Implementation ===");
+    LOG("========= Aurora Implementation =========");
     runTest<AuroraTable>();
 }
 
