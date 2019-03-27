@@ -75,7 +75,8 @@ void addTuples(TableType<NumCols> &table) {
     LOG("addTuple:\t\t" << queryTimeTotal.count() * 1000
                         << "\t" << queryTimeMax.count() * 1000
                         << "\t" << queryTimeAvg.count() * 1000
-                        << "\t" << queryTimeMin.count() * 1000);
+                        << "\t" << queryTimeMin.count() * 1000
+                        << "\t" << NUM_TUPLES);
 
 }
 
@@ -102,7 +103,7 @@ std::array<int, BIG_NUM_COLS> &getTuple<AuroraTable, BIG_NUM_COLS, SMALL_NUM_COL
  * Benchmarks time to scan a tuple.
  */
 template<template<int> typename TableType, int NumCols, int PrevNumCols>
-void scanTuples(TableType<NumCols> &table, TableType<PrevNumCols> &small_table) {
+void scanTuples(TableType<NumCols> &table, TableType<PrevNumCols> &small_table, int scanNum) {
 
     // Keep track of metrics
     std::chrono::duration<double> queryTimeMax(0);
@@ -149,14 +150,24 @@ void scanTuples(TableType<NumCols> &table, TableType<PrevNumCols> &small_table) 
     LOG("getNextTuple:\t" << queryTimeTotal.count() * 1000
                           << "\t" << queryTimeMax.count() * 1000
                           << "\t" << queryTimeAvg.count() * 1000
-                          << "\t" << queryTimeMin.count() * 1000);
+                          << "\t" << queryTimeMin.count() * 1000
+                          << "\t" << NUM_TUPLES
+                          << "\t\t" << "Full Table Scan #" << scanNum);
 }
 
 template<template<int> typename TableType>
 void runTest() {
-    // Log metrics information
+    // Log initial information
+    LOG("PreDDL Num Columns:\t\t\t" << SMALL_NUM_COLS);
+    LOG("PostDDL Num Columns:\t\t" << BIG_NUM_COLS);
+    LOG("Number Tuple Groups:\t\t" << NUMBER_TUPLE_GROUPS);
+    LOG("Number Tuples Per Group:\t" << NUMBER_TUPLES_PER_GROUP);
+    LOG("Total Number Tuples:\t\t" << NUM_TUPLES);
+    LOG("");
+
+    // Setup formatting
     std::cout << std::setprecision(6) << std::fixed;
-    LOG("\t\t\t\tTotal(ms)\tMax(ms)\t\tAvg(ms)\t\tMin(ms)");
+    LOG("\t\t\t\tTotal(ms)\tMax(ms)\t\tAvg(ms)\t\tMin(ms)\t\tCount\tNotes");
 
     // Set up table
     TableType<SMALL_NUM_COLS> smallTable;
@@ -164,7 +175,7 @@ void runTest() {
     // Benchmark operations
     addTuples(smallTable);
     for (int i = 0; i < 5; i++) {
-        scanTuples(smallTable, smallTable);
+        scanTuples(smallTable, smallTable, i);
     }
 
     // Perform ddl with benchmarks
@@ -174,11 +185,12 @@ void runTest() {
 
     const auto endDdl = std::chrono::high_resolution_clock::now();
     const std::chrono::duration<double> rDdlTime = endDdl - startDdl;
-    LOG("ddl:\t\t\t" << rDdlTime.count() * 1000);
+    LOG("addColumns:\t\t" << rDdlTime.count() * 1000
+                          << "\t\t\t\t\t\t\t\t\t\t" << 1);
 
     // Benchmark operations again
     for (int i = 0; i < 5; i++) {
-        scanTuples(bigTable, smallTable);
+        scanTuples(bigTable, smallTable, i);
     }
 }
 
