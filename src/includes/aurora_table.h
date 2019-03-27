@@ -41,7 +41,8 @@ public:
     std::array<int, NumAttr> &getNextTuple();
 
     /**
-     * Must be used after a DDL operation
+     * For Aurora table, lazy copies tuple groups after copy.
+     * Therefore, this function must be used! (instead of the one that takes no args)
      */
     template<int PrevNumAttr>
     std::array<int, NumAttr> &getNextTuple(AuroraTable<PrevNumAttr> &toCopy);

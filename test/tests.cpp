@@ -45,18 +45,56 @@ std::array<int, NumCols> generateTuple(int tupleId) {
 template<template<int> typename TableType, int NumCols>
 void addTuples(TableType<NumCols> &table) {
 
-    const auto startAdd = std::chrono::high_resolution_clock::now();
+    // Keep track of metrics
+    std::chrono::duration<double> queryTimeMax(0);
+    std::chrono::duration<double> queryTimeAvg(0);
+    std::chrono::duration<double> queryTimeMin(999999);
+    std::chrono::duration<double> queryTimeTotal(0);
 
     for (int i = 0; i < NUM_TUPLES; i++) {
+        // Run query with metrics
+        auto startQuery = std::chrono::high_resolution_clock::now();
+
+        // Actually do operation
         const std::array<int, NumCols> tuple = generateTuple<NumCols>(i);
         table.addTuple(tuple);
+
+        // Stop timing
+        auto endQuery = std::chrono::high_resolution_clock::now();
+        const std::chrono::duration<double> queryTime = endQuery - startQuery;
+
+        // Update metrics
+        queryTimeMax = std::max(queryTimeMax, queryTime);
+        queryTimeMin = std::min(queryTimeMin, queryTime);
+        queryTimeTotal += queryTime;
     }
 
-    const auto endAdd = std::chrono::high_resolution_clock::now();
-    const std::chrono::duration<double> addTime = endAdd - startAdd;
+    // Calculate average
+    queryTimeAvg = queryTimeTotal / NUM_TUPLES;
 
-    LOG("Add tuples to table (ms):\t\t" << addTime.count() * 1000);
+    LOG("addTuple:\t\t" << queryTimeTotal.count() * 1000
+                        << "\t" << queryTimeMax.count() * 1000
+                        << "\t" << queryTimeAvg.count() * 1000
+                        << "\t" << queryTimeMin.count() * 1000);
 
+}
+
+/**
+ * Default query tuple function.
+ * Note that small_table is not used by default.
+ */
+template<template<int> typename TableType, int NumCols, int PrevNumCols>
+std::array<int, NumCols> &getTuple(TableType<NumCols> &table, TableType<PrevNumCols> &small_table) {
+    return table.getNextTuple();
+}
+
+/**
+ * Template specialization for Aurora after DDL.
+ */
+template<>
+std::array<int, BIG_NUM_COLS> &getTuple<AuroraTable, BIG_NUM_COLS, SMALL_NUM_COLS>(AuroraTable<BIG_NUM_COLS> &table,
+                                                                                   AuroraTable<SMALL_NUM_COLS> &small_table) {
+    return table.getNextTuple(small_table);
 }
 
 /**
@@ -65,35 +103,6 @@ void addTuples(TableType<NumCols> &table) {
  */
 template<template<int> typename TableType, int NumCols, int PrevNumCols>
 void scanTuples(TableType<NumCols> &table, TableType<PrevNumCols> &small_table) {
-
-    auto startScan = std::chrono::high_resolution_clock::now();
-    table.startScan();
-
-    for (int i = 0; i < NUM_TUPLES; i++) {
-        const std::array<int, NumCols> &actual_tuple = table.getNextTuple();
-        const std::array<int, NumCols> &expected_tuple = generateTuple<NumCols>(i);
-        ASSERT_EQ(actual_tuple, expected_tuple) << "Durability broken...";
-    }
-
-    // Assert next scan throws exception
-    try {
-        table.getNextTuple();
-        FAIL() << "Did not throw exception when scanning for extra tuples";
-    } catch (const std::length_error &e) {
-        // Expected
-    }
-
-    auto endScan = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> scanTime = endScan - startScan;
-
-    LOG("Query tuples from table (ms):\t" << scanTime.count() * 1000);
-}
-
-/**
- * Template specialization for Aurora after DDL.
- */
-template<>
-void scanTuples<AuroraTable>(AuroraTable<BIG_NUM_COLS> &table, AuroraTable<SMALL_NUM_COLS> &small_table) {
 
     // Keep track of metrics
     std::chrono::duration<double> queryTimeMax(0);
@@ -107,14 +116,17 @@ void scanTuples<AuroraTable>(AuroraTable<BIG_NUM_COLS> &table, AuroraTable<SMALL
     // Run through each tuple in scan
     for (int i = 0; i < NUM_TUPLES; i++) {
 
-        // Run query
+        // Run query with metrics
         auto startQuery = std::chrono::high_resolution_clock::now();
-        const std::array<int, BIG_NUM_COLS> &actual_tuple = table.getNextTuple(small_table);
+
+        // Note this automatically uses the default or specialized versions as needed
+        const std::array<int, NumCols> &actual_tuple = getTuple<TableType, NumCols, PrevNumCols>(table, small_table);
+
         auto endQuery = std::chrono::high_resolution_clock::now();
         const std::chrono::duration<double> queryTime = endQuery - startQuery;
 
         // Durability check
-        const std::array<int, BIG_NUM_COLS> &expected_tuple = generateTuple<BIG_NUM_COLS>(i);
+        const std::array<int, NumCols> &expected_tuple = generateTuple<NumCols>(i);
         ASSERT_EQ(actual_tuple, expected_tuple) << "Durability broken...";
 
         // Update metrics
@@ -128,26 +140,32 @@ void scanTuples<AuroraTable>(AuroraTable<BIG_NUM_COLS> &table, AuroraTable<SMALL
 
     // Assert next scan throws exception
     try {
-        table.getNextTuple(small_table);
+        getTuple<TableType, NumCols, PrevNumCols>(table, small_table);
         FAIL() << "Did not throw exception when scanning for extra tuples";
     } catch (const std::length_error &e) {
         // Expected
     }
 
-    LOG("Query tuples from table (ms):\t" << queryTimeTotal.count() * 1000
-                                          << "\t" << queryTimeMax.count() * 1000
-                                          << "\t" << queryTimeAvg.count() * 1000
-                                          << "\t" << queryTimeMin.count() * 1000);
+    LOG("getNextTuple:\t" << queryTimeTotal.count() * 1000
+                          << "\t" << queryTimeMax.count() * 1000
+                          << "\t" << queryTimeAvg.count() * 1000
+                          << "\t" << queryTimeMin.count() * 1000);
 }
 
 template<template<int> typename TableType>
 void runTest() {
+    // Log metrics information
+    std::cout << std::setprecision(6) << std::fixed;
+    LOG("\t\t\t\tTotal(ms)\tMax(ms)\t\tAvg(ms)\t\tMin(ms)");
+
     // Set up table
     TableType<SMALL_NUM_COLS> smallTable;
 
     // Benchmark operations
     addTuples(smallTable);
-    scanTuples(smallTable, smallTable);
+    for (int i = 0; i < 5; i++) {
+        scanTuples(smallTable, smallTable);
+    }
 
     // Perform ddl with benchmarks
     const auto startDdl = std::chrono::high_resolution_clock::now();
@@ -156,7 +174,7 @@ void runTest() {
 
     const auto endDdl = std::chrono::high_resolution_clock::now();
     const std::chrono::duration<double> rDdlTime = endDdl - startDdl;
-    LOG("DDL to new table (ms):\t\t\t" << rDdlTime.count() * 1000);
+    LOG("ddl:\t\t\t" << rDdlTime.count() * 1000);
 
     // Benchmark operations again
     for (int i = 0; i < 5; i++) {
