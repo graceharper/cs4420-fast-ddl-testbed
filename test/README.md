@@ -2,7 +2,7 @@ We run our benchmarks on three types of tables:
 
 1. _Naive Contiguous Memory Table_: A naive MySQL table, where a DDL operation copies the entire table to a new table. All tuples in this table are stored contiguously in memory.
 2. _Naive Random Memory Table_: A naive MySQL table, where a DDL operation copies the entire table to a new table. All tuples within tuple groups (pages) are stored contiguously in memory, but tuple groups themselves are located on random sections of the heap. This better represents an on-disk database, so we used this table as a baseline for our Fast DDL benchmark.
-3. _Aurora Table_: A mock implementation of the Amazon Aurora's Fast DDL feature, where tuple groups are lazily copied on tuple access. This was the main table under test and was compared to the benchmarks from the naive table's baseline.
+3. _Aurora Table_: A mock implementation of the Amazon Aurora's Fast DDL feature, where tuple groups are lazily copied on tuple access. This was the main table under test and was compared to the benchmarks from the naive table's baseline. This was based off the following blog post - https://aws.amazon.com/blogs/database/amazon-aurora-under-the-hood-fast-ddl/
 
 We ran the following operations (in order) on each table, measuring latency as described above:
 
