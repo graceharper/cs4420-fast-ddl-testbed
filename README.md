@@ -13,6 +13,7 @@ For each DDL implementation, the testbed benchmarks how fast a full scan of the 
 
 
 ## Database Description
+All Database code is in the `src` folder.  
 There is no proper database, but there are tables on which the DDL operations are run. The Naive and Aurora implementations each have separate tables associated with them. 
 
 Each table consists of tuple groups, similar to the FSM logical tiles in class. There are multiple tuples to a tuple group and multiple tuple groups to a table. 
@@ -23,6 +24,11 @@ For the naive DDL, in order to consider both contiguous and non-contiguous memor
 
 Aurora has its own table implementation:   
 `aurora_table.tpp`
+
+## Benchmarks
+All benchmark code is under the `tests` folder.   
+`tests.cpp` contains the respective implementations for the Naive and Aurora-style DDL  
+These are the tests that get run in test_suite (see Setup & Running Section of README)
 
 
 
