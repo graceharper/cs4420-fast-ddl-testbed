@@ -1,7 +1,10 @@
+# CS 4420 Fast DDL Testbed
+
+> Benchmarking framework for common and custom row-oriented DDL implementations
 
 ## Team Information
 
-Benchmarking DDL
+Team #2: Benchmarking DDL
 
 Teju Nareddy, Sai Gundlapalli, Grace Harper
 
@@ -9,34 +12,35 @@ CS 4420 Spring 2019
 
 ## General Description 
 
-> Benchmarking framework for common and custom row-oriented DDL implementations
-
 This testbed implements scaled-down versions of Naive DDL (immediate full table copy) and Amazon's Aurora Instantaneous DDL. In both instances, the DDL implemented is adding a nullable column. Both DDL implementations are run on their own makeshift "databases."
 
 For each DDL implementation, the testbed benchmarks how fast a full scan of the table is completed, both before and after the DDL operation is run. Addtionally, the testbed benchmarks the time for an individual tuple query (of the scan) to be completed, allowing users to get a better idea of how the cost of Aurora's DDL is amortized across each tuple. 
 
 ## Database Description
 
-All Database code is in the `src` folder.  
-There is no proper database, but there are tables on which the DDL operations are run. The Naive and Aurora implementations each have separate tables associated with them. 
+All Database code is in the `src` folder.
 
-Each table consists of tuple groups, similar to the FSM logical tiles in class. There are multiple tuples to a tuple group and multiple tuple groups to a table. 
+There is no proper database, but there are tables on which the DDL operations are run.
+Each table consists of tuple groups, similar to pages for in-disk databases. There are multiple tuples to a tuple group and multiple tuple groups to a table. 
 
-For the naive DDL, in order to consider both contiguous and non-contiguous memory, there are two types of naive tables:   
-`naive_contiguous_mem_tuple_group.h` and `naive_random_mem_tuple_group.h`   
+We have implemented the following types of tables so far:
 
-Aurora has its own table implementation:   
-`aurora_table.h`
+1. _Naive Contiguous Memory Table_ - `naive_contiguous_mem_tuple_group.h`: A naive MySQL table, where a DDL operation copies the entire table to a new table. All tuples in this table are stored contiguously in memory.
+2. _Naive Random Memory Table_ - `naive_random_mem_tuple_group.h`: A naive MySQL table, where a DDL operation copies the entire table to a new table. All tuples within tuple groups (pages) are stored contiguously in memory, but tuple groups themselves are located on random sections of the heap. This better represents an on-disk database, so we used this table as a baseline for our Fast DDL benchmark.
+3. _Aurora Table_ - `aurora_table.h`: A mock implementation of the Amazon Aurora's Fast DDL feature, where tuple groups are lazily copied on tuple access. This was the main table under test and was compared to the benchmarks from the naive table's baseline. This was based off the following blog post - https://aws.amazon.com/blogs/database/amazon-aurora-under-the-hood-fast-ddl/
+
+_Note_: All table implementations run in-memory but emulate disk-based systems.
+
+_Note_: All table implementations are row-oriented (FSM).
 
 ## Benchmarks
 
 All benchmark code is under the `tests` folder.
-`tests.cpp` contains the respective implementations for the Naive and Aurora-style DDL  
-These are the tests that get run in test_suite (see Setup & Running Section of README)
+`tests.cpp` contains the respective implementations for the Naive and Aurora-style DDL.
 
-## Setup & Running 
+### Running the Benchmarks
 
-To run the testbed suite, begin in the `cs4420-fast-ddl-testbed` directory and run the following commands from the root project directory: 
+To run the benchmarks, begin run the following commands from the root project directory: 
 
 ```bash
 mkdir build
@@ -46,3 +50,15 @@ make
 cd bin
 ./test_suite
 ```
+
+Note that executing `./test_suite` runs all gTests inside `tests.cpp`.
+
+The output should be a table of metrics for each table type.
+
+### Results and Analysis
+
+See [test/README.md](test/README.md) for:
+
+- an in-depth explanation of the benchmarks
+- our results from multiple runs of the benchmarks
+- our analysis
