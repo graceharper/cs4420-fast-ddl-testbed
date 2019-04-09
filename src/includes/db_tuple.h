@@ -1,11 +1,16 @@
-//
-// Created by tejun on 3/19/2019.
-//
-
+/*
+** Created by tejun on 3/19/2019.
+**
+*******************************************************************************
+** This header file defines the tuple interface. Tuples are internally
+** represented as an array; currently, we only support integer attribute types.
+*/
 
 #pragma once
 
+
 #include <array>
+
 
 template<int NumAttr>
 class DbTuple {
@@ -14,6 +19,9 @@ public:
 
     DbTuple() = default;
 
+    /*
+    ** @param DbTuple, initializes new tuple with contents of provided tuple 
+    */
     template<int PrevNumAttr>
     DbTuple(DbTuple<PrevNumAttr> &toCopy);
 

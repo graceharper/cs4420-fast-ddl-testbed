@@ -1,6 +1,9 @@
-//
-// Created by tejun on 3/19/2019.
-//
+/*
+** Created by tejun on 3/19/2019.
+***********************************
+** This header file defines configurable variables about the database. 
+** Size of the table is configured here. 
+*/
 
 #pragma once
 
