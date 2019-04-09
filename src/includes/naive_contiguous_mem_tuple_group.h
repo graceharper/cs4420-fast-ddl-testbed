@@ -1,6 +1,10 @@
-//
-// Created by tejun on 3/18/2019.
-//
+/*
+** Created by tejun on 3/18/2019.
+***********************************
+** This header file defines the interface for naive tuple groups. 
+** Stores all tuples in contiguous memory. Memory is pre-allocated at compile time.
+*/
+
 
 #include "db_tuple.h"
 #include "constants.h"
@@ -9,13 +13,7 @@
 
 #pragma once
 
-/**
- * Stores all tuples in contiguous memory. Memory is pre-allocated at compile time.
- *
- * On DDL operation (copy constructor):
- * - Copies each tuple into new tuples
- * - Does an atomic swap (across all tuples) after copying is done
- */
+
 template<int NumAttr>
 class NaiveContiguousMemTupleGroup {
 
@@ -24,7 +22,13 @@ public:
     NaiveContiguousMemTupleGroup() = default;
 
     ~NaiveContiguousMemTupleGroup() = default;
-
+    /**
+     * 
+    *
+    * On DDL operation (copy constructor):
+    * - Copies each tuple into new tuples
+    * - Does an atomic swap (across all tuples) after copying is done
+    */
     template<int PrevNumAttr>
     NaiveContiguousMemTupleGroup(NaiveContiguousMemTupleGroup<PrevNumAttr> &toCopy);
 
