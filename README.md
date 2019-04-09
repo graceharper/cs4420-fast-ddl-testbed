@@ -4,9 +4,11 @@
 
 ## Team Information
 
-Team #2: Benchmarking DDL
+Team #2: Fast DDL
 
-Teju Nareddy, Sai Gundlapalli, Grace Harper
+[Teju Nareddy](https://github.com/nareddyt),
+ [Sai Gundlapalli](https://github.com/graceharper),
+ [Grace Harper](https://github.com/sgundlapalli11)
 
 CS 4420 Spring 2019
 
@@ -59,6 +61,14 @@ The output should be a table of metrics for each table type.
 
 See [test/README.md](test/README.md) for:
 
-- an in-depth explanation of the benchmarks
-- our results from multiple runs of the benchmarks
-- our analysis
+- An in-depth explanation of the benchmarks
+- Our results from multiple runs of the benchmarks
+- Our analysis and intuition behind the resulting metrics
+
+## Supporting Documents
+
+In addition to the documentation in this codebase, supporting documents include:
+
+- [Project Proposal Presentation](https://docs.google.com/presentation/d/1oEdkolkFgda12XUJjeELfOa_b0pdHPLqFVg76Ybenbk/edit?usp=sharing)
+- [Project Update Presentation](https://docs.google.com/presentation/d/102QaEbxZMtsjlURzfF2sE6JgidC0KcEO3V-eReXy_Ys/edit?usp=sharing)
+- [Project Progress Report](https://drive.google.com/open?id=1OmBx_R3mu9gFxAckW7q-zrzkbeWWwoDy)
