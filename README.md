@@ -29,7 +29,7 @@ We have implemented the following types of tables so far:
 
 1. _Naive Contiguous Memory Table_ - `naive_contiguous_mem_tuple_group.h`: A naive MySQL table, where a DDL operation copies the entire table to a new table. All tuples in this table are stored contiguously in memory.
 2. _Naive Random Memory Table_ - `naive_random_mem_tuple_group.h`: A naive MySQL table, where a DDL operation copies the entire table to a new table. All tuples within tuple groups (pages) are stored contiguously in memory, but tuple groups themselves are located on random sections of the heap. This better represents an on-disk database, so we used this table as a baseline for our Fast DDL benchmark.
-3. _Aurora Table_ - `aurora_table.h`: A mock implementation of the Amazon Aurora's Fast DDL feature, where tuple groups are lazily copied on tuple access. This was the main table under test and was compared to the benchmarks from the naive table's baseline. This was based off the following blog post - https://aws.amazon.com/blogs/database/amazon-aurora-under-the-hood-fast-ddl/
+3. _Aurora Table_ - `aurora_table.h`: A mock implementation of the Amazon Aurora's Fast DDL feature, where tuple groups are lazily copied on tuple access. This was the main table under test and was compared to the benchmarks from the naive table's baseline. This was based off the following [this AWS blog post](https://aws.amazon.com/blogs/database/amazon-aurora-under-the-hood-fast-ddl/).
 
 _Note_: All table implementations run in-memory but emulate disk-based systems.
 
@@ -38,24 +38,40 @@ _Note_: All table implementations are row-oriented (FSM).
 ## Benchmarks
 
 All benchmark code is under the `tests` folder.
-`tests.cpp` contains the respective implementations for the Naive and Aurora-style DDL.
+`tests.cpp` contains gTests that run benchmarks on each type of table implementation.
 
 ### Running the Benchmarks
 
-To run the benchmarks, begin run the following commands from the root project directory: 
+To run the benchmarks, you must execute the target `test_suite`.
+See the instructions in the sub-sections below for information on executing this target.
+
+The output should be a table of metrics for each table type.
+See [test/README.md](test/README.md) for an interpretation of these results.
+
+#### Prerequisites
+
+- Unix-based terminal
+- `cmake`
+- `gcc` or `clang`
+
+#### Command Line
+
+Run the following commands to build the project, built the executable, and then run it.
 
 ```bash
 mkdir build
 cd build
-cmake
+cmake ..
 make
 cd bin
 ./test_suite
 ```
 
-Note that executing `./test_suite` runs all gTests inside `tests.cpp`.
+#### CLion
 
-The output should be a table of metrics for each table type.
+Import the project using the pre-configured `CMakeLists.txt`.
+
+Then execute `test/tests.cpp` by right clicking on the file and selecting `Run all in tests.cpp`.
 
 ### Results and Analysis
 
