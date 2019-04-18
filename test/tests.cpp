@@ -196,10 +196,10 @@ void runTest() {
     LOG("");
 }
 
-TEST(DdlTest, NaiveContiguousMemory) {
-    LOG("========= Naive Contiguous Memory =========");
-    runTest<NaiveContiguousMemTable>();
-}
+//TEST(DdlTest, NaiveContiguousMemory) {
+//    LOG("========= Naive Contiguous Memory =========");
+//    runTest<NaiveContiguousMemTable>();
+//}
 
 TEST(DdlTest, NaiveRandomMemory) {
     LOG("========= Naive Random Memory =========");

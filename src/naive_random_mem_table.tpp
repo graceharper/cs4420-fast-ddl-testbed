@@ -14,11 +14,13 @@ template<int NumAttr>
 NaiveRandomMemTable<NumAttr>::NaiveRandomMemTable()
         : last_tuple_group_index(0), scan_index(0) {
 
+    this->tuple_groups = new std::array<std::unique_ptr<NaiveContiguousMemTupleGroup<NumAttr>>, NUMBER_TUPLE_GROUPS>();
+
     // Allocate space for the first tuple group. Init tuple group
     auto new_tuple_group_ptr = std::make_unique<NaiveContiguousMemTupleGroup<NumAttr>>();
 
     // Store tuple group in table
-    this->tuple_groups[0] = std::move(new_tuple_group_ptr);
+    (*(this->tuple_groups))[0] = std::move(new_tuple_group_ptr);
 
 }
 
@@ -28,6 +30,8 @@ template<int NumAttr>
 template<int PrevNumAttr>
 NaiveRandomMemTable<NumAttr>::NaiveRandomMemTable(NaiveRandomMemTable<PrevNumAttr> &toCopy)
         : last_tuple_group_index(toCopy.getLastTupleGroupIndex()), scan_index(0) {
+
+    this->tuple_groups = new std::array<std::unique_ptr<NaiveContiguousMemTupleGroup<NumAttr>>, NUMBER_TUPLE_GROUPS>();
 
     // Copy actual tuples groups directly. Note memory is NOT pre-allocated
     for (int i = 0; i <= toCopy.getLastTupleGroupIndex(); i++) {
@@ -39,7 +43,7 @@ NaiveRandomMemTable<NumAttr>::NaiveRandomMemTable(NaiveRandomMemTable<PrevNumAtt
         auto new_tuple_group_ptr = std::make_unique<NaiveContiguousMemTupleGroup<NumAttr>>(*to_copy_tuple_group);
 
         // Copy directly into array
-        this->tuple_groups[i] = std::move(new_tuple_group_ptr);
+        (*(this->tuple_groups))[i] = std::move(new_tuple_group_ptr);
     }
 
 }
@@ -73,7 +77,7 @@ void NaiveRandomMemTable<NumAttr>::addTuple(std::array<int, NumAttr> data) {
     new_tuple_group_ptr->addTuple(data);
 
     // Store tuple group in table
-    this->tuple_groups[this->last_tuple_group_index] = std::move(new_tuple_group_ptr);
+    (*(this->tuple_groups))[this->last_tuple_group_index] = std::move(new_tuple_group_ptr);
 
 }
 
@@ -137,5 +141,5 @@ int NaiveRandomMemTable<NumAttr>::getScanIndex() const {
 
 template<int NumAttr>
 NaiveContiguousMemTupleGroup<NumAttr> *NaiveRandomMemTable<NumAttr>::getTupleGroupAtIndex(int i) {
-    return this->tuple_groups[i].get();
+    return (*(this->tuple_groups))[i].get();
 }

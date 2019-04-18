@@ -54,7 +54,7 @@ public:
 protected:
 
     // Default-initialization of array
-    std::array<std::unique_ptr<NaiveContiguousMemTupleGroup<NumAttr>>, NUMBER_TUPLE_GROUPS> tuple_groups;
+    std::array<std::unique_ptr<NaiveContiguousMemTupleGroup<NumAttr>>, NUMBER_TUPLE_GROUPS> *tuple_groups = nullptr;
 
     int last_tuple_group_index = 0;
 

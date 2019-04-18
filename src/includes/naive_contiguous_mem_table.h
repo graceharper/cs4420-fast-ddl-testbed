@@ -25,12 +25,12 @@ class NaiveContiguousMemTable {
 
 public:
 
-    NaiveContiguousMemTable() = default;
+    NaiveContiguousMemTable();
 
     ~NaiveContiguousMemTable() = default;
 
     template<int PrevNumAttr>
-    NaiveContiguousMemTable(NaiveContiguousMemTable<PrevNumAttr> &toCopy);
+    explicit NaiveContiguousMemTable(NaiveContiguousMemTable<PrevNumAttr> &toCopy);
 
     void addTuple(std::array<int, NumAttr> data);
 
@@ -48,8 +48,7 @@ public:
 
 protected:
 
-    // Default-initialization of array
-    std::array<NaiveContiguousMemTupleGroup<NumAttr>, NUMBER_TUPLE_GROUPS> tuple_groups;
+    std::array<NaiveContiguousMemTupleGroup<NumAttr>, NUMBER_TUPLE_GROUPS> *tuple_groups = nullptr;
 
     int last_tuple_group_index = 0;
 
