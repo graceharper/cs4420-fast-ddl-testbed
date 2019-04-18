@@ -14,11 +14,14 @@ template<int NumAttr>
 AuroraTable<NumAttr>::AuroraTable()
         : last_tuple_group_index(0), scan_index(0), to_copy_index(NUMBER_TUPLE_GROUPS + 1) {
 
+    // Allocate space for array
+    this->tuple_groups = new std::array<std::unique_ptr<NaiveContiguousMemTupleGroup<NumAttr>>, NUMBER_TUPLE_GROUPS>();
+
     // Allocate space for the first tuple group. Init tuple group
     auto new_tuple_group_ptr = std::make_unique<NaiveContiguousMemTupleGroup<NumAttr>>();
 
     // Store tuple group in table
-    this->tuple_groups[0] = std::move(new_tuple_group_ptr);
+    (*(this->tuple_groups))[0] = std::move(new_tuple_group_ptr);
 
 }
 
@@ -27,7 +30,9 @@ AuroraTable<NumAttr>::AuroraTable()
 template<int NumAttr>
 template<int PrevNumAttr>
 AuroraTable<NumAttr>::AuroraTable(AuroraTable<PrevNumAttr> &toCopy)
-        : last_tuple_group_index(toCopy.getLastTupleGroupIndex()), scan_index(0), to_copy_index(0) {}
+        : last_tuple_group_index(toCopy.getLastTupleGroupIndex()), scan_index(0), to_copy_index(0) {
+    this->tuple_groups = new std::array<std::unique_ptr<NaiveContiguousMemTupleGroup<NumAttr>>, NUMBER_TUPLE_GROUPS>();
+}
 
 //////// DML Operations ////////
 
@@ -58,7 +63,7 @@ void AuroraTable<NumAttr>::addTuple(std::array<int, NumAttr> data) {
     new_tuple_group_ptr->addTuple(data);
 
     // Store tuple group in table
-    this->tuple_groups[this->last_tuple_group_index] = std::move(new_tuple_group_ptr);
+    (*(this->tuple_groups))[this->last_tuple_group_index] = std::move(new_tuple_group_ptr);
 
 }
 
@@ -133,7 +138,7 @@ std::array<int, NumAttr> &AuroraTable<NumAttr>::getNextTuple(AuroraTable<PrevNum
                 new_tuple_group_ptr->startScan();
 
                 // Copy directly into array
-                this->tuple_groups[this->scan_index] = std::move(new_tuple_group_ptr);
+                (*(this->tuple_groups))[this->scan_index] = std::move(new_tuple_group_ptr);
 
                 // Increment index
                 this->to_copy_index++;
@@ -173,5 +178,5 @@ int AuroraTable<NumAttr>::getScanIndex() const {
 
 template<int NumAttr>
 NaiveContiguousMemTupleGroup<NumAttr> *AuroraTable<NumAttr>::getTupleGroupAtIndex(int i) {
-    return this->tuple_groups[i].get();
+    return ((*(this->tuple_groups))[i]).get();
 }
