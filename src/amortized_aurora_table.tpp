@@ -93,6 +93,21 @@ void AmortizedAuroraTable<NumAttr>::startScan() {
         tuple_group->startScan();
     }
 
+    // Reset materialization threshold
+    this->num_tuple_groups_materialized = 0;
+
+}
+
+template<int NumAttr>
+template<int PrevNumAttr>
+void AmortizedAuroraTable<NumAttr>::startScan(AmortizedAuroraTable<PrevNumAttr> &toCopy) {
+
+    // Start scan on this table
+    startScan();
+
+    // Start scan on old table
+    toCopy.startScan();
+
 }
 
 template<int NumAttr>
@@ -138,17 +153,33 @@ std::array<int, NumAttr> &AmortizedAuroraTable<NumAttr>::getNextTuple(AmortizedA
 
         try {
 
-            // Make a lazy copy of the tuple group if needed
-            if (this->to_copy_index <= this->scan_index) {
-                // Extract actual tuple group
-                VersionedContiguousMemTupleGroup<PrevNumAttr> *to_copy_tuple_group =
-                        toCopy.getTupleGroupAtIndex(this->scan_index);
+            // Extract tuple group to copy
+            VersionedContiguousMemTupleGroup<PrevNumAttr> *to_copy_tuple_group =
+                    toCopy.getTupleGroupAtIndex(this->scan_index);
+
+            // Check if tuple group needs to be materialized
+            if (to_copy_tuple_group->getVersion() == Version::IN_DDL) {
+
+                // Check if we allowed to materialize in this scan operation
+                if (this->num_tuple_groups_materialized >= MAX_MATERIALIZATIONS_PER_QUERY) {
+
+                    // Materialization not allowed
+                    std::array<int, PrevNumAttr> &unmaterialized_tuple = to_copy_tuple_group->getNextTuple();
+                    for (int i = 0; i < PrevNumAttr; i++) {
+                        buffer_tuple[i] = unmaterialized_tuple[i];
+                    }
+                    for (int i = PrevNumAttr; i < NumAttr; i++) {
+                        buffer_tuple[i] = unmaterialized_tuple[PrevNumAttr - 1];
+                    }
+                    return buffer_tuple;
+
+                }
 
                 // Copy into pointer
                 auto new_tuple_group_ptr =
                         std::make_unique<VersionedContiguousMemTupleGroup<NumAttr>>(*to_copy_tuple_group);
 
-                // Reset scan index
+                // Reset scan index and version
                 new_tuple_group_ptr->startScan();
 
                 // Copy directly into array
@@ -156,9 +187,12 @@ std::array<int, NumAttr> &AmortizedAuroraTable<NumAttr>::getNextTuple(AmortizedA
 
                 // Increment index
                 this->to_copy_index++;
+
+                // Increment materialization threshold
+                this->num_tuple_groups_materialized++;
             }
 
-            // Try to scan the current tuple group
+            // Try to scan the current tuple group, should be materialized
             VersionedContiguousMemTupleGroup<NumAttr> *curr_tuple_group = this->getTupleGroupAtIndex(this->scan_index);
             return curr_tuple_group->getNextTuple();
 

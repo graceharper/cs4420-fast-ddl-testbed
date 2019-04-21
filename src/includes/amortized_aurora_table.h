@@ -31,6 +31,9 @@ public:
 
     void startScan();
 
+    template<int PrevNumAttr>
+    void startScan(AmortizedAuroraTable<PrevNumAttr> &toCopy);
+
     std::array<int, NumAttr> &getNextTuple();
 
     template<int PrevNumAttr>
@@ -55,6 +58,10 @@ protected:
     int scan_index = 0;
 
     int to_copy_index = NUMBER_TUPLE_GROUPS + 1;
+
+    int num_tuple_groups_materialized = 0;
+
+    std::array<int, NumAttr> buffer_tuple;
 
 };
 
