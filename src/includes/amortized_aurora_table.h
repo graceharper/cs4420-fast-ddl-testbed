@@ -37,7 +37,9 @@ public:
     std::array<int, NumAttr> &getNextTuple();
 
     template<int PrevNumAttr>
-    std::array<int, NumAttr> &getNextTuple(AmortizedAuroraTable<PrevNumAttr> &toCopy);
+    std::array<int, NumAttr> &getNextTuple(AmortizedAuroraTable<PrevNumAttr> &toCopy,
+                                           std::array<int, PrevNumAttr> &unmaterialized_tuple,
+                                           bool &materialized);
 
     bool isFull() const;
 
@@ -61,6 +63,7 @@ protected:
 
     int num_tuple_groups_materialized = 0;
 
+    // Default-initialization of array
     std::array<int, NumAttr> buffer_tuple;
 
 };

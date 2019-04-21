@@ -12,7 +12,7 @@
 
 template<int NumAttr>
 AmortizedAuroraTable<NumAttr>::AmortizedAuroraTable()
-        : last_tuple_group_index(0), scan_index(0), to_copy_index(NUMBER_TUPLE_GROUPS + 1) {
+        : last_tuple_group_index(0), scan_index(0), to_copy_index(NUMBER_TUPLE_GROUPS + 1), buffer_tuple() {
 
     // Allocate space for array
     this->tuple_groups = new std::array<std::unique_ptr<VersionedContiguousMemTupleGroup<NumAttr>>, NUMBER_TUPLE_GROUPS>();
@@ -37,7 +37,7 @@ AmortizedAuroraTable<NumAttr>::~AmortizedAuroraTable() {
 template<int NumAttr>
 template<int PrevNumAttr>
 AmortizedAuroraTable<NumAttr>::AmortizedAuroraTable(AmortizedAuroraTable<PrevNumAttr> &toCopy)
-        : last_tuple_group_index(toCopy.getLastTupleGroupIndex()), scan_index(0), to_copy_index(0) {
+        : last_tuple_group_index(toCopy.getLastTupleGroupIndex()), scan_index(0), to_copy_index(0), buffer_tuple() {
     this->tuple_groups = new std::array<std::unique_ptr<VersionedContiguousMemTupleGroup<NumAttr>>, NUMBER_TUPLE_GROUPS>();
 
     // Mark all tuple groups in old table as a new version
@@ -142,7 +142,13 @@ std::array<int, NumAttr> &AmortizedAuroraTable<NumAttr>::getNextTuple() {
 
 template<int NumAttr>
 template<int PrevNumAttr>
-std::array<int, NumAttr> &AmortizedAuroraTable<NumAttr>::getNextTuple(AmortizedAuroraTable<PrevNumAttr> &toCopy) {
+std::array<int, NumAttr> &AmortizedAuroraTable<NumAttr>::getNextTuple(
+        AmortizedAuroraTable<PrevNumAttr> &toCopy,
+        std::array<int, PrevNumAttr> &unmaterialized_tuple,
+        bool &materialized) {
+
+    // Optimistically assume materialization will occur
+    materialized = true;
 
     while (true) {
 
@@ -163,14 +169,13 @@ std::array<int, NumAttr> &AmortizedAuroraTable<NumAttr>::getNextTuple(AmortizedA
                 // Check if we allowed to materialize in this scan operation
                 if (this->num_tuple_groups_materialized >= MAX_MATERIALIZATIONS_PER_QUERY) {
 
-                    // Materialization not allowed
-                    std::array<int, PrevNumAttr> &unmaterialized_tuple = to_copy_tuple_group->getNextTuple();
-                    for (int i = 0; i < PrevNumAttr; i++) {
-                        buffer_tuple[i] = unmaterialized_tuple[i];
-                    }
-                    for (int i = PrevNumAttr; i < NumAttr; i++) {
-                        buffer_tuple[i] = unmaterialized_tuple[PrevNumAttr - 1];
-                    }
+                    // Materialization not allowed, directly set previous tuple
+                    unmaterialized_tuple = to_copy_tuple_group->getNextTuple();
+
+                    // Notify caller
+                    materialized = false;
+
+                    // Return temporary value (that doesn't matter)
                     return buffer_tuple;
 
                 }

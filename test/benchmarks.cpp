@@ -19,6 +19,9 @@
 
 #define LOG(X) std::cout << X << std::endl
 
+std::array<int, SMALL_NUM_COLS> unmaterialized_tuple;
+std::array<int, BIG_NUM_COLS> materialized_tuple;
+
 
 /**
  * Generates a tuple of the correct size, where all elements in the tuple are set the it's id.
@@ -88,27 +91,56 @@ void addTuples(TableType<NumCols> &table) {
  * Note that small_table is not used by default.
  */
 template<template<int> typename TableType, int NumCols, int PrevNumCols>
-std::array<int, NumCols> &getTuple(TableType<NumCols> &table, TableType<PrevNumCols> &small_table) {
-    return table.getNextTuple();
+std::array<int, NumCols> &getTuple(TableType<NumCols> &table, TableType<PrevNumCols> &small_table,
+                                   std::chrono::time_point<std::chrono::high_resolution_clock> &end_query) {
+
+    std::array<int, NumCols> &tuple = table.getNextTuple();
+    end_query = std::chrono::high_resolution_clock::now();
+    return tuple;
 }
 
 /**
  * Template specialization for Aurora after DDL.
  */
 template<>
-std::array<int, BIG_NUM_COLS> &getTuple<AuroraTable, BIG_NUM_COLS, SMALL_NUM_COLS>(AuroraTable<BIG_NUM_COLS> &table,
-                                                                                   AuroraTable<SMALL_NUM_COLS> &small_table) {
-    return table.getNextTuple(small_table);
+std::array<int, BIG_NUM_COLS> &getTuple<AuroraTable, BIG_NUM_COLS, SMALL_NUM_COLS>(
+        AuroraTable<BIG_NUM_COLS> &table,
+        AuroraTable<SMALL_NUM_COLS> &small_table,
+        std::chrono::time_point<std::chrono::high_resolution_clock> &end_query) {
+
+    std::array<int, BIG_NUM_COLS> &tuple = table.getNextTuple(small_table);
+    end_query = std::chrono::high_resolution_clock::now();
+    return tuple;
 }
 
 /**
  * Template specialization for Amortized Aurora after DDL.
  */
 template<>
-std::array<int, BIG_NUM_COLS> &
-getTuple<AmortizedAuroraTable, BIG_NUM_COLS, SMALL_NUM_COLS>(AmortizedAuroraTable<BIG_NUM_COLS> &table,
-                                                             AmortizedAuroraTable<SMALL_NUM_COLS> &small_table) {
-    return table.getNextTuple(small_table);
+std::array<int, BIG_NUM_COLS> &getTuple<AmortizedAuroraTable, BIG_NUM_COLS, SMALL_NUM_COLS>(
+        AmortizedAuroraTable<BIG_NUM_COLS> &table,
+        AmortizedAuroraTable<SMALL_NUM_COLS> &small_table,
+        std::chrono::time_point<std::chrono::high_resolution_clock> &end_query) {
+
+    bool materialized = true;
+    std::array<int, BIG_NUM_COLS> &tuple = table.getNextTuple<SMALL_NUM_COLS>(small_table, unmaterialized_tuple,
+                                                                              materialized);
+    end_query = std::chrono::high_resolution_clock::now();
+
+    // Check if it was successfully materialized
+    if (materialized) {
+        return tuple;
+    }
+
+    // Otherwise must modify contents for durability check in caller
+    for (int i = 0; i < SMALL_NUM_COLS; i++) {
+        materialized_tuple[i] = unmaterialized_tuple[i];
+    }
+    for (int i = SMALL_NUM_COLS; i < BIG_NUM_COLS; i++) {
+        materialized_tuple[i] = materialized_tuple[i - 1];
+    }
+
+    return materialized_tuple;
 }
 
 template<template<int> typename TableType, int NumCols, int PrevNumCols>
@@ -148,11 +180,11 @@ void scanTuples(TableType<NumCols> &table, TableType<PrevNumCols> &small_table, 
 
         // Run query with metrics
         auto startQuery = std::chrono::high_resolution_clock::now();
+        std::chrono::time_point<std::chrono::high_resolution_clock> endQuery;
 
         // Note this automatically uses the default or specialized versions as needed
-        const std::array<int, NumCols> &actual_tuple = getTuple<TableType, NumCols, PrevNumCols>(table, small_table);
-
-        auto endQuery = std::chrono::high_resolution_clock::now();
+        const std::array<int, NumCols> &actual_tuple =
+                getTuple<TableType, NumCols, PrevNumCols>(table, small_table, endQuery);
         const std::chrono::duration<double> queryTime = endQuery - startQuery;
 
         // Durability check
@@ -170,7 +202,8 @@ void scanTuples(TableType<NumCols> &table, TableType<PrevNumCols> &small_table, 
 
     // Assert next scan throws exception
     try {
-        getTuple<TableType, NumCols, PrevNumCols>(table, small_table);
+        std::chrono::time_point<std::chrono::high_resolution_clock> endQuery;
+        getTuple<TableType, NumCols, PrevNumCols>(table, small_table, endQuery);
         FAIL() << "Did not throw exception when scanning for extra tuples";
     } catch (const std::length_error &e) {
         // Expected
