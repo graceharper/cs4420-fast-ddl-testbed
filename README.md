@@ -38,7 +38,7 @@ _Note_: All table implementations are row-oriented (FSM).
 ## Benchmarks
 
 All benchmark code is under the `tests` folder.
-`tests.cpp` contains gTests that run benchmarks on each type of table implementation.
+`benchmarks.cpp` contains gTests that run benchmarks on each type of table implementation.
 
 ### Running the Benchmarks
 
@@ -71,7 +71,7 @@ cd bin
 
 Import the project using the pre-configured `CMakeLists.txt`.
 
-Then execute `test/tests.cpp` by right clicking on the file and selecting `Run all in tests.cpp`.
+Then execute `test/benchmarks.cpp` by right clicking on the file and selecting `Run all in benchmarks.cpp`.
 
 ### Results and Analysis
 
