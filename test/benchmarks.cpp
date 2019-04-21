@@ -7,7 +7,8 @@
 #include <chrono>
 #include <array>
 
-#include <aurora_table.h>
+#include "aurora_table.h"
+#include "amortized_aurora_table.h"
 #include "naive_contiguous_mem_table.h"
 #include "naive_random_mem_table.h"
 #include "testing_constants.h"
@@ -95,6 +96,16 @@ std::array<int, NumCols> &getTuple(TableType<NumCols> &table, TableType<PrevNumC
 template<>
 std::array<int, BIG_NUM_COLS> &getTuple<AuroraTable, BIG_NUM_COLS, SMALL_NUM_COLS>(AuroraTable<BIG_NUM_COLS> &table,
                                                                                    AuroraTable<SMALL_NUM_COLS> &small_table) {
+    return table.getNextTuple(small_table);
+}
+
+/**
+ * Template specialization for Amortized Aurora after DDL.
+ */
+template<>
+std::array<int, BIG_NUM_COLS> &
+getTuple<AmortizedAuroraTable, BIG_NUM_COLS, SMALL_NUM_COLS>(AmortizedAuroraTable<BIG_NUM_COLS> &table,
+                                                             AmortizedAuroraTable<SMALL_NUM_COLS> &small_table) {
     return table.getNextTuple(small_table);
 }
 
@@ -209,6 +220,11 @@ TEST(DdlTest, NaiveRandomMemory) {
 TEST(DdlTest, Aurora) {
     LOG("========= Aurora Implementation =========");
     runTest<AuroraTable>();
+}
+
+TEST(DdlTest, AmortizedAurora) {
+    LOG("========= Amortized Aurora Implementation =========");
+    runTest<AmortizedAuroraTable>();
 }
 
 int main(int argc, char **argv) {
