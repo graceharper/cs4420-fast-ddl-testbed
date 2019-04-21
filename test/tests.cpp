@@ -193,7 +193,7 @@ void runTest() {
         scanTuples(bigTable, smallTable, i);
     }
 
-    LOG("");
+    LOG("Done");
 }
 
 //TEST(DdlTest, NaiveContiguousMemory) {

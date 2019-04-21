@@ -18,7 +18,14 @@ NaiveContiguousMemTable<NumAttr>::NaiveContiguousMemTable()
     this->tuple_groups = new std::array<NaiveContiguousMemTupleGroup<NumAttr>, NUMBER_TUPLE_GROUPS>();
 }
 
-//////// DDL Operations ////////
+//////// Destructor ////////
+
+template<int NumAttr>
+NaiveContiguousMemTable<NumAttr>::~NaiveContiguousMemTable() {
+    delete this->tuple_groups;
+}
+
+//////// DDL Operations (Copy Constructor) ////////
 
 template<int NumAttr>
 template<int PrevNumAttr>

@@ -23,7 +23,7 @@ public:
 
     NaiveRandomMemTable();
 
-    ~NaiveRandomMemTable() = default;
+    ~NaiveRandomMemTable();
 
     /*
     ** On DDL operation (copy constructor):

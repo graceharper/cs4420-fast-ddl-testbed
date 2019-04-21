@@ -27,7 +27,7 @@ public:
 
     NaiveContiguousMemTable();
 
-    ~NaiveContiguousMemTable() = default;
+    ~NaiveContiguousMemTable();
 
     template<int PrevNumAttr>
     explicit NaiveContiguousMemTable(NaiveContiguousMemTable<PrevNumAttr> &toCopy);

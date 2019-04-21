@@ -24,7 +24,14 @@ NaiveRandomMemTable<NumAttr>::NaiveRandomMemTable()
 
 }
 
-//////// DDL Operations ////////
+//////// Destructor ////////
+
+template<int NumAttr>
+NaiveRandomMemTable<NumAttr>::~NaiveRandomMemTable() {
+    delete this->tuple_groups;
+}
+
+//////// DDL Operations (Copy Constructor) ////////
 
 template<int NumAttr>
 template<int PrevNumAttr>

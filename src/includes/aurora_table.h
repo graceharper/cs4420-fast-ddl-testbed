@@ -29,7 +29,7 @@ public:
 
     AuroraTable();
 
-    ~AuroraTable() = default;
+    ~AuroraTable();
 
     template<int PrevNumAttr>
     explicit AuroraTable(AuroraTable<PrevNumAttr> &toCopy);

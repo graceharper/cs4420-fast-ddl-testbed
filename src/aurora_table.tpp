@@ -25,7 +25,14 @@ AuroraTable<NumAttr>::AuroraTable()
 
 }
 
-//////// DDL Operations ////////
+//////// Destructor ////////
+
+template<int NumAttr>
+AuroraTable<NumAttr>::~AuroraTable() {
+    delete this->tuple_groups;
+}
+
+//////// DDL Operations (Copy Constructor) ////////
 
 template<int NumAttr>
 template<int PrevNumAttr>
