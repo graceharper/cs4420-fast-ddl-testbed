@@ -1,0 +1,89 @@
+=== General Config ===
+PreDDL Num Columns:						1024
+PostDDL Num Columns:					2048
+Full Scans before DDL:					5
+Full Scans after DDL:					13
+Number Tuple Groups:					64
+Number Tuples Per Group:				16384
+Total Number Tuples:					1048576
+
+=== Amortized Aurora Config ===
+Tuple Group Materializations Per Scan:	8
+
+========= Naive Random Memory ========
+
+				Total(ms)	Max(ms)		Avg(ms)		Min(ms)		Count	Notes
+addTuple:		1.2321e+04	1.2987e+02	1.1751e-02	5.9000e-03	1048576
+getNextTuple:	9.1857e+02	6.7180e-01	8.7602e-04	8.0000e-04	1048576		Full Table Scan #0
+getNextTuple:	9.1837e+02	1.5060e-01	8.7583e-04	8.0000e-04	1048576		Full Table Scan #1
+getNextTuple:	9.1851e+02	6.7080e-01	8.7596e-04	8.0000e-04	1048576		Full Table Scan #2
+getNextTuple:	9.1844e+02	6.6360e-01	8.7589e-04	8.0000e-04	1048576		Full Table Scan #3
+getNextTuple:	9.1963e+02	6.8030e-01	8.7703e-04	8.0000e-04	1048576		Full Table Scan #4
+addColumns:		3.6442e+04										1
+getNextTuple:	1.1654e+03	6.6490e-01	1.1114e-03	9.0000e-04	1048576		Full Table Scan #0
+getNextTuple:	1.1103e+03	6.7730e-01	1.0588e-03	9.0000e-04	1048576		Full Table Scan #1
+getNextTuple:	1.1105e+03	7.6010e-01	1.0591e-03	9.0000e-04	1048576		Full Table Scan #2
+getNextTuple:	9.4434e+02	6.6570e-01	9.0060e-04	8.0000e-04	1048576		Full Table Scan #3
+getNextTuple:	9.2682e+02	6.6220e-01	8.8388e-04	8.0000e-04	1048576		Full Table Scan #4
+getNextTuple:	9.2809e+02	6.6660e-01	8.8509e-04	8.0000e-04	1048576		Full Table Scan #5
+getNextTuple:	9.3066e+02	6.7630e-01	8.8755e-04	8.0000e-04	1048576		Full Table Scan #6
+getNextTuple:	9.2801e+02	2.8830e-01	8.8502e-04	8.0000e-04	1048576		Full Table Scan #7
+getNextTuple:	9.2926e+02	6.8280e-01	8.8621e-04	8.0000e-04	1048576		Full Table Scan #8
+getNextTuple:	9.2791e+02	6.7700e-01	8.8492e-04	8.0000e-04	1048576		Full Table Scan #9
+getNextTuple:	9.2769e+02	6.7360e-01	8.8472e-04	8.0000e-04	1048576		Full Table Scan #10
+getNextTuple:	9.2891e+02	6.8400e-01	8.8587e-04	8.0000e-04	1048576		Full Table Scan #11
+getNextTuple:	9.2705e+02	4.8080e-01	8.8411e-04	8.0000e-04	1048576		Full Table Scan #12
+
+Done in 4m 34s 336ms
+
+========= Aurora Implementation =========
+
+				Total(ms)	Max(ms)		Avg(ms)		Min(ms)		Count	Notes
+addTuple:		1.1813e+04	1.3539e+02	1.1266e-02	5.9000e-03	1048576
+getNextTuple:	9.2010e+02	5.1890e-01	8.7747e-04	8.0000e-04	1048576		Full Table Scan #0
+getNextTuple:	9.2508e+02	6.6680e-01	8.8223e-04	8.0000e-04	1048576		Full Table Scan #1
+getNextTuple:	9.1862e+02	6.7100e-01	8.7606e-04	8.0000e-04	1048576		Full Table Scan #2
+getNextTuple:	9.1882e+02	6.7390e-01	8.7626e-04	8.0000e-04	1048576		Full Table Scan #3
+getNextTuple:	9.1917e+02	6.6220e-01	8.7659e-04	8.0000e-04	1048576		Full Table Scan #4
+addColumns:		1.3000e-03										1
+getNextTuple:	3.2881e+04	1.0639e+03	3.1358e-02	8.0000e-04	1048576		Full Table Scan #0
+getNextTuple:	9.4766e+02	6.9820e-01	9.0376e-04	8.0000e-04	1048576		Full Table Scan #1
+getNextTuple:	9.4433e+02	7.0240e-01	9.0058e-04	8.0000e-04	1048576		Full Table Scan #2
+getNextTuple:	9.3070e+02	6.8040e-01	8.8758e-04	8.0000e-04	1048576		Full Table Scan #3
+getNextTuple:	9.3154e+02	6.4120e-01	8.8839e-04	8.0000e-04	1048576		Full Table Scan #4
+getNextTuple:	9.2471e+02	3.9500e-02	8.8187e-04	8.0000e-04	1048576		Full Table Scan #5
+getNextTuple:	9.2362e+02	5.6700e-02	8.8083e-04	8.0000e-04	1048576		Full Table Scan #6
+getNextTuple:	9.2457e+02	5.2390e-01	8.8173e-04	8.0000e-04	1048576		Full Table Scan #7
+getNextTuple:	9.3162e+02	6.7230e-01	8.8846e-04	8.0000e-04	1048576		Full Table Scan #8
+getNextTuple:	9.2932e+02	6.1980e-01	8.8626e-04	8.0000e-04	1048576		Full Table Scan #9
+getNextTuple:	9.3059e+02	6.8770e-01	8.8748e-04	8.0000e-04	1048576		Full Table Scan #10
+getNextTuple:	9.2811e+02	6.8050e-01	8.8511e-04	8.0000e-04	1048576		Full Table Scan #11
+getNextTuple:	9.2638e+02	6.7640e-01	8.8346e-04	8.0000e-04	1048576		Full Table Scan #12
+
+Done in 4m 19s 323ms
+
+========= Amortized Aurora Implementation =========
+
+				Total(ms)	Max(ms)		Avg(ms)		Min(ms)		Count	Notes
+addTuple:		1.1268e+04	7.9587e+01	1.0746e-02	5.9000e-03	1048576
+getNextTuple:	9.2235e+02	6.5650e-01	8.7962e-04	8.0000e-04	1048576		Full Table Scan #0
+getNextTuple:	9.2203e+02	6.5040e-01	8.7931e-04	8.0000e-04	1048576		Full Table Scan #1
+getNextTuple:	9.2379e+02	6.8060e-01	8.8099e-04	8.0000e-04	1048576		Full Table Scan #2
+getNextTuple:	9.2563e+02	6.7540e-01	8.8275e-04	8.0000e-04	1048576		Full Table Scan #3
+getNextTuple:	9.2776e+02	5.3800e-02	8.8478e-04	8.0000e-04	1048576		Full Table Scan #4
+addColumns:		4.0400e-02										1
+getNextTuple:	5.2323e+03	4.8741e+02	4.9900e-03	8.0000e-04	1048576		Full Table Scan #0
+getNextTuple:	5.1659e+03	4.8285e+02	4.9266e-03	8.0000e-04	1048576		Full Table Scan #1
+getNextTuple:	5.1110e+03	5.0469e+02	4.8743e-03	8.0000e-04	1048576		Full Table Scan #2
+getNextTuple:	5.1194e+03	4.8761e+02	4.8822e-03	8.0000e-04	1048576		Full Table Scan #3
+getNextTuple:	5.0087e+03	5.0050e+02	4.7767e-03	8.0000e-04	1048576		Full Table Scan #4
+getNextTuple:	5.0455e+03	5.0817e+02	4.8118e-03	8.0000e-04	1048576		Full Table Scan #5
+getNextTuple:	5.0109e+03	5.4289e+02	4.7788e-03	8.0000e-04	1048576		Full Table Scan #6
+getNextTuple:	5.0093e+03	5.8029e+02	4.7773e-03	8.0000e-04	1048576		Full Table Scan #7
+getNextTuple:	9.6665e+02	7.8360e-01	9.2187e-04	8.0000e-04	1048576		Full Table Scan #8
+getNextTuple:	9.5435e+02	1.7440e-01	9.1013e-04	8.0000e-04	1048576		Full Table Scan #9
+getNextTuple:	9.5156e+02	7.0400e-01	9.0748e-04	8.0000e-04	1048576		Full Table Scan #10
+getNextTuple:	9.5631e+02	6.6990e-01	9.1201e-04	8.0000e-04	1048576		Full Table Scan #11
+getNextTuple:	9.5532e+02	6.8330e-01	9.1107e-04	8.0000e-04	1048576		Full Table Scan #12
+
+Done in 5m 24s 58ms
