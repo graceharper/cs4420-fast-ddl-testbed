@@ -39,6 +39,12 @@ template<int PrevNumAttr>
 AmortizedAuroraTable<NumAttr>::AmortizedAuroraTable(AmortizedAuroraTable<PrevNumAttr> &toCopy)
         : last_tuple_group_index(toCopy.getLastTupleGroupIndex()), scan_index(0), to_copy_index(0) {
     this->tuple_groups = new std::array<std::unique_ptr<VersionedContiguousMemTupleGroup<NumAttr>>, NUMBER_TUPLE_GROUPS>();
+
+    // Mark all tuple groups in old table as a new version
+    for (int i = 0; i <= toCopy.getLastTupleGroupIndex(); i++) {
+        VersionedContiguousMemTupleGroup<PrevNumAttr> *tuple_group = toCopy.getTupleGroupAtIndex(i);
+        tuple_group->setVersion(Version::IN_DDL);
+    }
 }
 
 //////// DML Operations ////////

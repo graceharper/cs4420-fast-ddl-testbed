@@ -12,7 +12,11 @@ template<int NumAttr>
 template<int PrevNumAttr>
 VersionedContiguousMemTupleGroup<NumAttr>::VersionedContiguousMemTupleGroup(
         VersionedContiguousMemTupleGroup<PrevNumAttr> &toCopy): last_tuple_index(toCopy.getLastTupleIndex()),
-                                                                scan_index(0) {
+                                                                scan_index(0),
+                                                                version(Version::PRE_DDL) {
+
+    // Assertions
+    assert(toCopy.getVersion() == Version::IN_DDL);
 
     // Copy actual tuples directly. Note memory is already pre-allocated, just overwrite
     for (int i = 0; i < toCopy.getLastTupleIndex(); i++) {
@@ -27,6 +31,9 @@ VersionedContiguousMemTupleGroup<NumAttr>::VersionedContiguousMemTupleGroup(
         this->tuples[i] = new_tuple;
 
     }
+
+    // Mark copied group as outdated
+    toCopy.setVersion(Version::POST_DDL);
 
 }
 
@@ -92,4 +99,14 @@ int VersionedContiguousMemTupleGroup<NumAttr>::getScanIndex() const {
 template<int NumAttr>
 DbTuple<NumAttr> &VersionedContiguousMemTupleGroup<NumAttr>::getTupleAtIndex(int i) {
     return this->tuples[i];
+}
+
+template<int NumAttr>
+Version VersionedContiguousMemTupleGroup<NumAttr>::getVersion() const {
+    return version;
+}
+
+template<int NumAttr>
+void VersionedContiguousMemTupleGroup<NumAttr>::setVersion(Version v) {
+    this->version = v;
 }

@@ -7,6 +7,7 @@
 
 
 #include "db_tuple.h"
+#include "version.h"
 #include "constants.h"
 
 #include <array>
@@ -49,6 +50,10 @@ public:
 
     int getScanIndex() const;
 
+    Version getVersion() const;
+
+    void setVersion(Version v);
+
 protected:
 
     // Default-initialization of array
@@ -57,6 +62,8 @@ protected:
     int last_tuple_index = 0;
 
     int scan_index = 0;
+
+    Version version = Version::PRE_DDL;
 
 };
 
