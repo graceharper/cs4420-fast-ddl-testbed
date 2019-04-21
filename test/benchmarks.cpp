@@ -49,7 +49,7 @@ std::array<int, NumCols> generateTuple(int tupleId) {
 template<template<int> typename TableType, int NumCols>
 void addTuples(TableType<NumCols> &table) {
 
-    std::cout << "addTuple:\t\t";
+    std::cout << "addTuple:\t\t" << std::flush;
 
     // Keep track of metrics
     std::chrono::duration<double> queryTimeMax(0);
@@ -164,7 +164,7 @@ void startScan<AmortizedAuroraTable, BIG_NUM_COLS, SMALL_NUM_COLS>(AmortizedAuro
 template<template<int> typename TableType, int NumCols, int PrevNumCols>
 void scanTuples(TableType<NumCols> &table, TableType<PrevNumCols> &small_table, int scanNum) {
 
-    std::cout << "getNextTuple:\t";
+    std::cout << "getNextTuple:\t" << std::flush;
 
     // Keep track of metrics
     std::chrono::duration<double> queryTimeMax(0);
@@ -220,15 +220,22 @@ void scanTuples(TableType<NumCols> &table, TableType<PrevNumCols> &small_table, 
 template<template<int> typename TableType>
 void runTest() {
     // Log initial information
-    LOG("PreDDL Num Columns:\t\t\t" << SMALL_NUM_COLS);
-    LOG("PostDDL Num Columns:\t\t" << BIG_NUM_COLS);
-    LOG("Number Tuple Groups:\t\t" << NUMBER_TUPLE_GROUPS);
-    LOG("Number Tuples Per Group:\t" << NUMBER_TUPLES_PER_GROUP);
-    LOG("Total Number Tuples:\t\t" << NUM_TUPLES);
+    LOG("=== General Config ===");
+    LOG("PreDDL Num Columns:\t\t\t\t\t\t" << SMALL_NUM_COLS);
+    LOG("PostDDL Num Columns:\t\t\t\t\t" << BIG_NUM_COLS);
+    LOG("Full Scans before DDL:\t\t\t\t\t" << NUM_FULL_SCANS_PRE_DDL);
+    LOG("Full Scans after DDL:\t\t\t\t\t" << NUM_FULL_SCANS_POST_DDL);
+    LOG("Number Tuple Groups:\t\t\t\t\t" << NUMBER_TUPLE_GROUPS);
+    LOG("Number Tuples Per Group:\t\t\t\t" << NUMBER_TUPLES_PER_GROUP);
+    LOG("Total Number Tuples:\t\t\t\t\t" << NUM_TUPLES);
+    LOG("");
+
+    LOG("=== Amortized Aurora Config ===");
+    LOG("Tuple Group Materializations Per Scan:\t" << MAX_MATERIALIZATIONS_PER_QUERY);
     LOG("");
 
     // Setup formatting
-    std::cout << std::setprecision(6) << std::fixed;
+    std::cout << std::setprecision(4) << std::scientific;
     LOG("\t\t\t\tTotal(ms)\tMax(ms)\t\tAvg(ms)\t\tMin(ms)\t\tCount\tNotes");
 
     // Set up table
@@ -236,12 +243,12 @@ void runTest() {
 
     // Benchmark operations
     addTuples(smallTable);
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < NUM_FULL_SCANS_PRE_DDL; i++) {
         scanTuples(smallTable, smallTable, i);
     }
 
     // Perform ddl with benchmarks
-    std::cout << "addColumns:\t\t";
+    std::cout << "addColumns:\t\t" << std::flush;
     const auto startDdl = std::chrono::high_resolution_clock::now();
 
     TableType<BIG_NUM_COLS> bigTable(smallTable);
@@ -252,7 +259,7 @@ void runTest() {
                 << "\t\t\t\t\t\t\t\t\t\t" << 1);
 
     // Benchmark operations again
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < NUM_FULL_SCANS_POST_DDL; i++) {
         scanTuples(bigTable, smallTable, i);
     }
 
