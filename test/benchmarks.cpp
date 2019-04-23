@@ -3,9 +3,10 @@
 //
 
 #include <gtest/gtest.h>
-#include <iostream>
 #include <chrono>
 #include <array>
+#include <iostream>
+#include <fstream>
 
 #include "aurora_table.h"
 #include "amortized_aurora_table.h"
@@ -16,6 +17,8 @@
 //Because the table constructors use templates
 //the size of the table must be a compile time constant
 //hence the testing_constants.h file
+
+const std::string OUTPUT_DIR = "./benchmark_output/";
 
 #define LOG(X) std::cout << X << std::endl
 
@@ -162,7 +165,7 @@ void startScan<AmortizedAuroraTable, BIG_NUM_COLS, SMALL_NUM_COLS>(AmortizedAuro
  * Benchmarks time to scan a tuple.
  */
 template<template<int> typename TableType, int NumCols, int PrevNumCols>
-void scanTuples(TableType<NumCols> &table, TableType<PrevNumCols> &small_table, int scanNum) {
+void scanTuples(TableType<NumCols> &table, TableType<PrevNumCols> &small_table, int scanNum, std::ofstream &outfile) {
 
     std::cout << "getNextTuple:\t" << std::flush;
 
@@ -190,6 +193,9 @@ void scanTuples(TableType<NumCols> &table, TableType<PrevNumCols> &small_table, 
         // Durability check
         const std::array<int, NumCols> &expected_tuple = generateTuple<NumCols>(i);
         ASSERT_EQ(actual_tuple, expected_tuple) << "Durability broken...";
+
+        // Write query time to file
+        outfile << queryTime.count() * 1000 << std::endl;
 
         // Update metrics
         queryTimeMax = std::max(queryTimeMax, queryTime);
@@ -220,6 +226,10 @@ void scanTuples(TableType<NumCols> &table, TableType<PrevNumCols> &small_table, 
 template<template<int> typename TableType>
 void runTest() {
     // Log initial information
+    const std::string test_name = testing::UnitTest::GetInstance()->current_test_info()->name();
+    LOG("========= " << test_name << " Implementation =========");
+    LOG("");
+
     LOG("=== General Config ===");
     LOG("PreDDL Num Columns:\t\t\t\t\t\t" << SMALL_NUM_COLS);
     LOG("PostDDL Num Columns:\t\t\t\t\t" << BIG_NUM_COLS);
@@ -244,7 +254,11 @@ void runTest() {
     // Benchmark operations
     addTuples(smallTable);
     for (int i = 0; i < NUM_FULL_SCANS_PRE_DDL; i++) {
-        scanTuples(smallTable, smallTable, i);
+        const std::string file_name = OUTPUT_DIR + test_name + "/pre-dll-" + std::to_string(i) + ".out";
+        std::ofstream outfile(file_name);
+        outfile << "getNextTupleTime(ms)" << std::endl;
+        scanTuples(smallTable, smallTable, i, outfile);
+        outfile.close();
     }
 
     // Perform ddl with benchmarks
@@ -260,7 +274,11 @@ void runTest() {
 
     // Benchmark operations again
     for (int i = 0; i < NUM_FULL_SCANS_POST_DDL; i++) {
-        scanTuples(bigTable, smallTable, i);
+        const std::string file_name = OUTPUT_DIR + test_name + "/post-dll-" + std::to_string(i) + ".out";
+        std::ofstream outfile(file_name);
+        outfile << "getNextTupleTime(ms)" << std::endl;
+        scanTuples(bigTable, smallTable, i, outfile);
+        outfile.close();
     }
 
     LOG("Done");
@@ -272,17 +290,14 @@ void runTest() {
 //}
 
 TEST(DdlTest, NaiveRandomMemory) {
-    LOG("========= Naive Random Memory =========");
     runTest<NaiveRandomMemTable>();
 }
 
 TEST(DdlTest, Aurora) {
-    LOG("========= Aurora Implementation =========");
     runTest<AuroraTable>();
 }
 
 TEST(DdlTest, AmortizedAurora) {
-    LOG("========= Amortized Aurora Implementation =========");
     runTest<AmortizedAuroraTable>();
 }
 
