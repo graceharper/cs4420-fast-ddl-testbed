@@ -7,6 +7,7 @@
 #include <array>
 #include <iostream>
 #include <fstream>
+#include <dirent.h>
 
 #include "aurora_table.h"
 #include "amortized_aurora_table.h"
@@ -25,6 +26,18 @@ const std::string OUTPUT_DIR = "./benchmark_output/";
 std::array<int, SMALL_NUM_COLS> unmaterialized_tuple;
 std::array<int, BIG_NUM_COLS> materialized_tuple;
 
+void delete_files_in_folder(const std::string &folder_path) {
+    DIR *folder = opendir(folder_path.c_str());
+    struct dirent *next_file;
+    char filepath[256];
+
+    while ((next_file = readdir(folder)) != nullptr) {
+        // build the path for each file in the folder
+        sprintf(filepath, "%s/%s", folder_path.c_str(), next_file->d_name);
+        remove(filepath);
+    }
+    closedir(folder);
+}
 
 /**
  * Generates a tuple of the correct size, where all elements in the tuple are set the it's id.
@@ -244,6 +257,10 @@ void runTest() {
     LOG("Tuple Group Materializations Per Scan:\t" << MAX_MATERIALIZATIONS_PER_QUERY);
     LOG("");
 
+    // Delete all files in folder
+    const std::string output_folder_name = OUTPUT_DIR + test_name;
+    delete_files_in_folder(output_folder_name);
+
     // Setup formatting
     std::cout << std::setprecision(4) << std::scientific;
     LOG("\t\t\t\tTotal(ms)\tMax(ms)\t\tAvg(ms)\t\tMin(ms)\t\tCount\tNotes");
@@ -254,7 +271,7 @@ void runTest() {
     // Benchmark operations
     addTuples(smallTable);
     for (int i = 0; i < NUM_FULL_SCANS_PRE_DDL; i++) {
-        const std::string file_name = OUTPUT_DIR + test_name + "/pre-dll-" + std::to_string(i) + ".out";
+        const std::string file_name = output_folder_name + "/pre-dll-" + std::to_string(i) + ".out";
         std::ofstream outfile(file_name);
         outfile << "getNextTupleTime(ms)" << std::endl;
         scanTuples(smallTable, smallTable, i, outfile);
@@ -274,7 +291,7 @@ void runTest() {
 
     // Benchmark operations again
     for (int i = 0; i < NUM_FULL_SCANS_POST_DDL; i++) {
-        const std::string file_name = OUTPUT_DIR + test_name + "/post-dll-" + std::to_string(i) + ".out";
+        const std::string file_name = output_folder_name + "/post-dll-" + std::to_string(i) + ".out";
         std::ofstream outfile(file_name);
         outfile << "getNextTupleTime(ms)" << std::endl;
         scanTuples(bigTable, smallTable, i, outfile);
