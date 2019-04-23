@@ -2,8 +2,8 @@
 // Created by tejun on 3/23/2019.
 //
 
-#include "naive_random_mem_table.h"
-#include "naive_contiguous_mem_tuple_group.h"
+#include "includes/table/aurora_table.h"
+#include "includes/tuple_group/naive_contiguous_mem_tuple_group.h"
 
 #include <assert.h>
 #include <stdexcept>
@@ -11,9 +11,10 @@
 //////// Constructor ////////
 
 template<int NumAttr>
-NaiveRandomMemTable<NumAttr>::NaiveRandomMemTable()
-        : last_tuple_group_index(0), scan_index(0) {
+AuroraTable<NumAttr>::AuroraTable()
+        : last_tuple_group_index(0), scan_index(0), to_copy_index(NUMBER_TUPLE_GROUPS + 1) {
 
+    // Allocate space for array
     this->tuple_groups = new std::array<std::unique_ptr<NaiveContiguousMemTupleGroup<NumAttr>>, NUMBER_TUPLE_GROUPS>();
 
     // Allocate space for the first tuple group. Init tuple group
@@ -27,7 +28,7 @@ NaiveRandomMemTable<NumAttr>::NaiveRandomMemTable()
 //////// Destructor ////////
 
 template<int NumAttr>
-NaiveRandomMemTable<NumAttr>::~NaiveRandomMemTable() {
+AuroraTable<NumAttr>::~AuroraTable() {
     delete this->tuple_groups;
 }
 
@@ -35,30 +36,15 @@ NaiveRandomMemTable<NumAttr>::~NaiveRandomMemTable() {
 
 template<int NumAttr>
 template<int PrevNumAttr>
-NaiveRandomMemTable<NumAttr>::NaiveRandomMemTable(NaiveRandomMemTable<PrevNumAttr> &toCopy)
-        : last_tuple_group_index(toCopy.getLastTupleGroupIndex()), scan_index(0) {
-
+AuroraTable<NumAttr>::AuroraTable(AuroraTable<PrevNumAttr> &toCopy)
+        : last_tuple_group_index(toCopy.getLastTupleGroupIndex()), scan_index(0), to_copy_index(0) {
     this->tuple_groups = new std::array<std::unique_ptr<NaiveContiguousMemTupleGroup<NumAttr>>, NUMBER_TUPLE_GROUPS>();
-
-    // Copy actual tuples groups directly. Note memory is NOT pre-allocated
-    for (int i = 0; i <= toCopy.getLastTupleGroupIndex(); i++) {
-
-        // Extract actual tuple
-        NaiveContiguousMemTupleGroup<PrevNumAttr> *to_copy_tuple_group = toCopy.getTupleGroupAtIndex(i);
-
-        // Copy into pointer
-        auto new_tuple_group_ptr = std::make_unique<NaiveContiguousMemTupleGroup<NumAttr>>(*to_copy_tuple_group);
-
-        // Copy directly into array
-        (*(this->tuple_groups))[i] = std::move(new_tuple_group_ptr);
-    }
-
 }
 
 //////// DML Operations ////////
 
 template<int NumAttr>
-void NaiveRandomMemTable<NumAttr>::addTuple(std::array<int, NumAttr> data) {
+void AuroraTable<NumAttr>::addTuple(std::array<int, NumAttr> data) {
 
     // Check if the last tuple group has space for this tuple
     NaiveContiguousMemTupleGroup<NumAttr> *last_tuple_group = this->getTupleGroupAtIndex(this->last_tuple_group_index);
@@ -89,13 +75,13 @@ void NaiveRandomMemTable<NumAttr>::addTuple(std::array<int, NumAttr> data) {
 }
 
 template<int NumAttr>
-void NaiveRandomMemTable<NumAttr>::startScan() {
+void AuroraTable<NumAttr>::startScan() {
 
     // Reset scan index to point to first tuple group
     this->scan_index = 0;
 
-    // Reset scan index in all tuple groups
-    for (int i = 0; i <= this->last_tuple_group_index; i++) {
+    // Reset scan index in all tuple groups (only if copy done)
+    for (int i = 0; i <= this->last_tuple_group_index && i < this->to_copy_index; i++) {
         NaiveContiguousMemTupleGroup<NumAttr> *tuple_group = this->getTupleGroupAtIndex(i);
         tuple_group->startScan();
     }
@@ -103,7 +89,7 @@ void NaiveRandomMemTable<NumAttr>::startScan() {
 }
 
 template<int NumAttr>
-std::array<int, NumAttr> &NaiveRandomMemTable<NumAttr>::getNextTuple() {
+std::array<int, NumAttr> &AuroraTable<NumAttr>::getNextTuple() {
 
     while (true) {
 
@@ -113,6 +99,57 @@ std::array<int, NumAttr> &NaiveRandomMemTable<NumAttr>::getNextTuple() {
         }
 
         try {
+
+            // Make a lazy copy of the tuple group if needed
+            if (this->to_copy_index <= this->scan_index) {
+                assert(false);
+            }
+
+            // Try to scan the current tuple group
+            NaiveContiguousMemTupleGroup<NumAttr> *curr_tuple_group = this->getTupleGroupAtIndex(this->scan_index);
+            return curr_tuple_group->getNextTuple();
+
+        } catch (const std::length_error &e) {
+
+            // Tuple group has been fully scanned, move onto next tuple group
+            this->scan_index++;
+
+        }
+    }
+}
+
+template<int NumAttr>
+template<int PrevNumAttr>
+std::array<int, NumAttr> &AuroraTable<NumAttr>::getNextTuple(AuroraTable<PrevNumAttr> &toCopy) {
+
+    while (true) {
+
+        // Check if there are no more tuple groups to scan
+        if (this->scan_index > this->last_tuple_group_index) {
+            throw std::length_error("No more tuple groups to scan in table");
+        }
+
+        try {
+
+            // Make a lazy copy of the tuple group if needed
+            if (this->to_copy_index <= this->scan_index) {
+                // Extract actual tuple group
+                NaiveContiguousMemTupleGroup<PrevNumAttr> *to_copy_tuple_group =
+                        toCopy.getTupleGroupAtIndex(this->scan_index);
+
+                // Copy into pointer
+                auto new_tuple_group_ptr =
+                        std::make_unique<NaiveContiguousMemTupleGroup<NumAttr>>(*to_copy_tuple_group);
+
+                // Reset scan index
+                new_tuple_group_ptr->startScan();
+
+                // Copy directly into array
+                (*(this->tuple_groups))[this->scan_index] = std::move(new_tuple_group_ptr);
+
+                // Increment index
+                this->to_copy_index++;
+            }
 
             // Try to scan the current tuple group
             NaiveContiguousMemTupleGroup<NumAttr> *curr_tuple_group = this->getTupleGroupAtIndex(this->scan_index);
@@ -130,23 +167,23 @@ std::array<int, NumAttr> &NaiveRandomMemTable<NumAttr>::getNextTuple() {
 //////// Other ////////
 
 template<int NumAttr>
-bool NaiveRandomMemTable<NumAttr>::isFull() const {
+bool AuroraTable<NumAttr>::isFull() const {
     return this->last_tuple_group_index >= NUMBER_TUPLE_GROUPS;
 }
 
 //////// Getters ////////
 
 template<int NumAttr>
-int NaiveRandomMemTable<NumAttr>::getLastTupleGroupIndex() const {
+int AuroraTable<NumAttr>::getLastTupleGroupIndex() const {
     return last_tuple_group_index;
 }
 
 template<int NumAttr>
-int NaiveRandomMemTable<NumAttr>::getScanIndex() const {
+int AuroraTable<NumAttr>::getScanIndex() const {
     return scan_index;
 }
 
 template<int NumAttr>
-NaiveContiguousMemTupleGroup<NumAttr> *NaiveRandomMemTable<NumAttr>::getTupleGroupAtIndex(int i) {
-    return (*(this->tuple_groups))[i].get();
+NaiveContiguousMemTupleGroup<NumAttr> *AuroraTable<NumAttr>::getTupleGroupAtIndex(int i) {
+    return ((*(this->tuple_groups))[i]).get();
 }

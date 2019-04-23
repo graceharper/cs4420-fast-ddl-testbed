@@ -6,8 +6,7 @@
 */
 
 
-#include "db_tuple.h"
-#include "version.h"
+#include "includes/tuple/db_tuple.h"
 #include "constants.h"
 
 #include <array>
@@ -16,14 +15,13 @@
 
 
 template<int NumAttr>
-class VersionedContiguousMemTupleGroup {
+class NaiveContiguousMemTupleGroup {
 
 public:
 
-    VersionedContiguousMemTupleGroup() = default;
+    NaiveContiguousMemTupleGroup() = default;
 
-    ~VersionedContiguousMemTupleGroup() = default;
-
+    ~NaiveContiguousMemTupleGroup() = default;
     /**
      * 
     *
@@ -32,7 +30,7 @@ public:
     * - Does an atomic swap (across all tuples) after copying is done
     */
     template<int PrevNumAttr>
-    VersionedContiguousMemTupleGroup(VersionedContiguousMemTupleGroup<PrevNumAttr> &toCopy);
+    NaiveContiguousMemTupleGroup(NaiveContiguousMemTupleGroup<PrevNumAttr> &toCopy);
 
     void addTuple(std::array<int, NumAttr> data);
 
@@ -50,10 +48,6 @@ public:
 
     int getScanIndex() const;
 
-    Version getVersion() const;
-
-    void setVersion(Version v);
-
 protected:
 
     // Default-initialization of array
@@ -63,10 +57,8 @@ protected:
 
     int scan_index = 0;
 
-    Version version = Version::PRE_DDL;
-
 };
 
 // Link to template implementation
-#include "versioned_contiguous_mem_tuple_group.tpp"
+#include "tuple_group/naive_contiguous_mem_tuple_group.tpp"
 

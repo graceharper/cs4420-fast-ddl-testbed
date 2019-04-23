@@ -2,7 +2,7 @@
 // Created by tejun on 3/18/2019.
 //
 
-#include "versioned_contiguous_mem_tuple_group.h"
+#include "includes/tuple_group/versioned_contiguous_mem_tuple_group.h"
 
 #include <assert.h>
 

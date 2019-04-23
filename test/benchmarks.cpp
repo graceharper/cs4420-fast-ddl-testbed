@@ -9,12 +9,12 @@
 #include <fstream>
 #include <dirent.h>
 
-#include "aurora_table.h"
-#include "amortized_aurora_table.h"
-#include "naive_contiguous_mem_table.h"
-#include "naive_random_mem_table.h"
+#include "includes/table/aurora_table.h"
+#include "includes/table/amortized_aurora_table.h"
+#include "includes/table/naive_contiguous_mem_table.h"
+#include "includes/table/naive_random_mem_table.h"
 #include "testing_constants.h"
-#include "db_tuple.h"
+#include "includes/tuple/db_tuple.h"
 //Because the table constructors use templates
 //the size of the table must be a compile time constant
 //hence the testing_constants.h file
@@ -29,12 +29,11 @@ std::array<int, BIG_NUM_COLS> materialized_tuple;
 void delete_files_in_folder(const std::string &folder_path) {
     DIR *folder = opendir(folder_path.c_str());
     struct dirent *next_file;
-    char filepath[256];
 
     while ((next_file = readdir(folder)) != nullptr) {
         // build the path for each file in the folder
-        sprintf(filepath, "%s/%s", folder_path.c_str(), next_file->d_name);
-        remove(filepath);
+        std::string file_path = folder_path + next_file->d_name;
+        remove(file_path.c_str());
     }
     closedir(folder);
 }

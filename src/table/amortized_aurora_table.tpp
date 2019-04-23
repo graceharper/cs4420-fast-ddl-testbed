@@ -2,8 +2,8 @@
 // Created by tejun on 4/20/2019.
 //
 
-#include "amortized_aurora_table.h"
-#include "versioned_contiguous_mem_tuple_group.h"
+#include "includes/table/amortized_aurora_table.h"
+#include "includes/tuple_group/versioned_contiguous_mem_tuple_group.h"
 
 #include <assert.h>
 #include <stdexcept>

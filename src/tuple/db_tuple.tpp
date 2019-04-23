@@ -2,7 +2,7 @@
 // Created by tejun on 3/19/2019.
 //
 
-#include "db_tuple.h"
+#include "includes/tuple/db_tuple.h"
 
 //////// DDL Operations ////////
 

@@ -2,9 +2,9 @@
 // Created by tejun on 3/18/2019.
 //
 
-#include "naive_contiguous_mem_table.h"
-#include "naive_random_mem_table.h"
-#include "db_tuple.h"
+#include "includes/table/naive_contiguous_mem_table.h"
+#include "includes/table/naive_random_mem_table.h"
+#include "includes/tuple/db_tuple.h"
 
 #include <iostream>
 

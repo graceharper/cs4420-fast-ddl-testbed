@@ -7,7 +7,7 @@
 
 
 #include "constants.h"
-#include "naive_contiguous_mem_tuple_group.h"
+#include "includes/tuple_group/naive_contiguous_mem_tuple_group.h"
 
 #include <array>
 #include <memory>
@@ -70,4 +70,4 @@ protected:
 };
 
 // Link to template implementation
-#include "aurora_table.tpp"
+#include "table/aurora_table.tpp"

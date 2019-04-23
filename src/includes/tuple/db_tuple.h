@@ -40,6 +40,6 @@ protected:
 };
 
 // Link to template implementation
-#include "db_tuple.tpp"
+#include "tuple/db_tuple.tpp"
 
 
