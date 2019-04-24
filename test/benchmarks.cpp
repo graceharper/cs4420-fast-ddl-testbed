@@ -271,10 +271,16 @@ void runTest() {
     // Benchmark operations
     addTuples(smallTable);
     for (int i = 0; i < NUM_FULL_SCANS_PRE_DDL; i++) {
+
+        // Setup output file (with formatting)
         const std::string file_name = output_folder_name + "/pre-dll-" + std::to_string(i) + ".out";
         std::ofstream outfile(file_name);
         outfile << "getNextTupleTime(ms)" << std::endl;
+        outfile << std::setprecision(4) << std::scientific;
+
+        // Actual operation
         scanTuples(smallTable, smallTable, i, outfile);
+
         outfile.close();
     }
 
@@ -291,10 +297,16 @@ void runTest() {
 
     // Benchmark operations again
     for (int i = 0; i < NUM_FULL_SCANS_POST_DDL; i++) {
+
+        // Setup output file (with formatting)
         const std::string file_name = output_folder_name + "/post-dll-" + std::to_string(i) + ".out";
         std::ofstream outfile(file_name);
         outfile << "getNextTupleTime(ms)" << std::endl;
+        outfile << std::setprecision(4) << std::scientific;
+
+        // Actual operation
         scanTuples(bigTable, smallTable, i, outfile);
+
         outfile.close();
     }
 
