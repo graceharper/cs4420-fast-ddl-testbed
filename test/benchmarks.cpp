@@ -32,7 +32,8 @@ void delete_files_in_folder(const std::string &folder_path) {
 
     while ((next_file = readdir(folder)) != nullptr) {
         // build the path for each file in the folder
-        std::string file_path = folder_path + next_file->d_name;
+        std::string file_name(next_file->d_name, next_file->d_reclen);
+        std::string file_path = folder_path + "/" + file_name;
         remove(file_path.c_str());
     }
     closedir(folder);
