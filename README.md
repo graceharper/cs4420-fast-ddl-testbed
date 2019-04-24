@@ -2,13 +2,24 @@
 
 > Benchmarking framework for common and custom row-oriented DDL implementations
 
+  * [Team Information](#team-information)
+  * [General Description](#general-description)
+  * [Database Description](#database-description)
+  * [Benchmarks](#benchmarks)
+     * [Running the Benchmarks](#running-the-benchmarks)
+        * [Prerequisites](#prerequisites)
+        * [Command Line](#command-line)
+        * [CLion](#clion)
+     * [Results and Analysis](#results-and-analysis)
+  * [Supporting Documents](#supporting-documents)
+
 ## Team Information
 
 Team #2: Fast DDL
 
 [Teju Nareddy](https://github.com/nareddyt),
- [Sai Gundlapalli](https://github.com/graceharper),
- [Grace Harper](https://github.com/sgundlapalli11)
+ [Sai Gundlapalli](https://github.com/sgundlapalli11),
+ [Grace Harper](https://github.com/graceharper)
 
 CS 4420 Spring 2019
 
