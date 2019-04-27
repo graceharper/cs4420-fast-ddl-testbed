@@ -31,7 +31,7 @@ For each DDL implementation, the testbed benchmarks how fast a full scan of the 
 
 ## Database Description
 
-All Database code is in the `src` folder.
+All Database code is in the `src\table` folder.
 
 There is no proper database, but there are tables on which the DDL operations are run.
 Each table consists of tuple groups, similar to pages for in-disk databases. There are multiple tuples to a tuple group and multiple tuple groups to a table. 
@@ -41,6 +41,7 @@ We have implemented the following types of tables so far:
 1. _Naive Contiguous Memory Table_ - `naive_contiguous_mem_tuple_group.h`: A naive MySQL table, where a DDL operation copies the entire table to a new table. All tuples in this table are stored contiguously in memory.
 2. _Naive Random Memory Table_ - `naive_random_mem_tuple_group.h`: A naive MySQL table, where a DDL operation copies the entire table to a new table. All tuples within tuple groups (pages) are stored contiguously in memory, but tuple groups themselves are located on random sections of the heap. This better represents an on-disk database, so we used this table as a baseline for our Fast DDL benchmark.
 3. _Aurora Table_ - `aurora_table.h`: A mock implementation of the Amazon Aurora's Fast DDL feature, where tuple groups are lazily copied on tuple access. This was the main table under test and was compared to the benchmarks from the naive table's baseline. This was based off the following [this AWS blog post](https://aws.amazon.com/blogs/database/amazon-aurora-under-the-hood-fast-ddl/).
+4. _Amortized Aurora Table_ - `amortized_aurora_table.h`: An incremental change to `aurora.h`, where each full scan is limited in the number of tuple group materializations. This is our custom Fast DDL implementation, which reduces the _long tail latency problem_ and amortized the overhead of tuple group materialization across multiple full scans.
 
 _Note_: All table implementations run in-memory but emulate disk-based systems.
 
@@ -51,7 +52,14 @@ _Note_: All table implementations are row-oriented (FSM).
 All benchmark code is under the `tests` folder.
 `benchmarks.cpp` contains gTests that run benchmarks on each type of table implementation.
 
+### Results and Analysis
+
+For your convenience, we have included results from running our benchmarks locally and an in-depth analysis of the results.
+See [test/README.md](test/README.md) for more information.
+
 ### Running the Benchmarks
+
+To verify our results and analysis, you may wish to run the benchmarks on your machine.
 
 To run the benchmarks, you must execute the target `test_suite`.
 See the instructions in the sub-sections below for information on executing this target.
@@ -80,17 +88,11 @@ cd bin
 
 #### CLion
 
+Alternatively, we support running the benchmarks from CLion.
+
 Import the project using the pre-configured `CMakeLists.txt`.
 
 Then execute `test/benchmarks.cpp` by right clicking on the file and selecting `Run all in benchmarks.cpp`.
-
-### Results and Analysis
-
-See [test/README.md](test/README.md) for:
-
-- An in-depth explanation of the benchmarks
-- Our results from multiple runs of the benchmarks
-- Our analysis and intuition behind the resulting metrics
 
 ## Supporting Documents
 
