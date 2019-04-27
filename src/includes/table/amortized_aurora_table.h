@@ -13,7 +13,14 @@
 #include <memory>
 
 /**
- * TODO
+ * Tuple groups are not stored contiguously.
+ * Instead, they are created when needed (when a previous tuple group doesn't have space for a new tuple).
+ * Tuple groups are versioned.
+ *
+ * Only materializes tuple groups when they are accessed (lazily).
+ *
+ * Limits the number of materializations per full scan,
+ * returning un-materialized tuples with metadata when this limit is exceeded.
  */
 template<int NumAttr>
 class AmortizedAuroraTable {

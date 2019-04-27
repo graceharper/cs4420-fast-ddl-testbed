@@ -16,11 +16,7 @@
  * Tuple groups are not stored contiguously.
  * Instead, they are created when needed (when a previous tuple group doesn't have space for a new tuple).
  *
- * On DDL operation (copy constructor):
- * - Locks the entire table
- * - Copies each tuple group into new tuple groups
- * - Does an atomic swap (across all tuple groups) after copying is done
- * - Unlocks the entire table
+ * Only materializes tuple groups when they are accessed (lazily).
  */
 template<int NumAttr>
 class AuroraTable {

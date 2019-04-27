@@ -159,6 +159,9 @@ std::array<int, BIG_NUM_COLS> &getTuple<AmortizedAuroraTable, BIG_NUM_COLS, SMAL
     return materialized_tuple;
 }
 
+/**
+ * Default start scan function.
+ */
 template<template<int> typename TableType, int NumCols, int PrevNumCols>
 void startScan(TableType<NumCols> &table, TableType<PrevNumCols> &small_table) {
     table.startScan();
