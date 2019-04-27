@@ -52,3 +52,5 @@ The Amortized Aurora implementation successfully amortizes the very high time in
 Additionally, it reduces individual tuple access times greatly.
 
 This reduces the **long tail latency** problem.
+
+For further explanation and analysis, please view the supporting documents in the main [README.md](../README.md).
