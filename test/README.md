@@ -14,11 +14,11 @@ We ran the following operations (in order) on each table, measuring latency as d
 
 This figure compares the Naive vs Aurora operation times:
 
-![Table Operations Comparison](../images/benchmarks-operations-metrics.png "Table Operations Comparison" | width=600)
+![Table Operations Comparison](../images/benchmarks-operations-metrics.png "Table Operations Comparison")
 
 This figure shows the large variance in individual tuple access times in the full scan directly after a Fast DDL in the Aurora table:
 
-![Aurora Tuple Access Times](../images/benchmarks-subsequent-scan-metrics.png "Aurora Tuple Access Times" | width=600)
+![Aurora Tuple Access Times](../images/benchmarks-subsequent-scan-metrics.png "Aurora Tuple Access Times")
 
 ### Amortized Aurora
 
